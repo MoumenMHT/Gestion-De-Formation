@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Details</title>
+</head>
+<body>
+    <h1>User Details</h1>
+    <p><strong>Email:</strong> {{ user.user_email }}</p>
+    <p><strong>Username:</strong> {{ user.user_username }}</p>
+    <p><strong>First Name:</strong> {{ user.user_firstname }}</p>
+    <p><strong>Last Name:</strong> {{ user.user_lastname }}</p>
+    <p><strong>Role:</strong> {{ user.user_role }}</p>
+    <p><strong>Created On:</strong> {{ user.user_cree_date }}</p>
+    <p><strong>Last Updated:</strong> {{ user.user_miseajour_date }}</p>
+    <a href="{% url 'users:user_update' user.pk %}">Edit</a> |
+    <a href="{% url 'users:user_delete' user.pk %}">Delete</a> |
+    <a href="{% url 'users:user_list' %}">Back to List</a>
+</body>
+</html>
