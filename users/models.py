@@ -40,10 +40,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     user_cree_par = models.CharField(max_length=50, blank=True, null=True)
     user_cree_date = models.DateTimeField(default=timezone.now)
     user_miseajour_par = models.CharField(max_length=50, blank=True, null=True)
-    user_miseajour_date = models.DateTimeField(auto_now=True)
+    user_miseajour_date = models.DateTimeField(auto_now=True, null=True)
     user_role = models.CharField(max_length=50)
+    structure = models.ForeignKey('Structure', on_delete=models.CASCADE, related_name='users', null=True)
 
-    # Required fields for AbstractBaseUser
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
@@ -65,9 +65,6 @@ class Structure(models.Model):
     structure_miseajour_date = models.DateTimeField(auto_now=True)
     structure_niveau = models.CharField(max_length=50)
 
-    # Many-to-many relationship with User
-    users = models.ManyToManyField(User, related_name='structures')
-
     def __str__(self):
         return self.structure_varchar
 
@@ -86,22 +83,11 @@ class Formation(models.Model):
     formation_programme = models.TextField(blank=True, null=True)
     formation_cible = models.TextField(blank=True, null=True)
     formation_objectif = models.TextField(blank=True, null=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='formations')
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='formations', null=True)
+    structure = models.ForeignKey('Structure', on_delete=models.CASCADE, related_name='formations')
 
     def __str__(self):
         return self.formation_titre
-
-class Session(models.Model):
-    session_id = models.AutoField(primary_key=True)
-    session_debut_date = models.DateTimeField()
-    session_fin_date = models.DateTimeField()
-    session_cree_par = models.CharField(max_length=50, blank=True, null=True)
-    session_cree_date = models.DateTimeField(default=timezone.now)
-    formation = models.ForeignKey(Formation, on_delete=models.CASCADE, related_name='sessions')
-    participants = models.ManyToManyField(User, related_name='sessions')
-
-    def __str__(self):
-        return f"Session for {self.formation.formation_titre}"
 
 class UserFormation(models.Model):
     user_formation_id = models.AutoField(primary_key=True)
@@ -112,5 +98,42 @@ class UserFormation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_formations')
     formation = models.ForeignKey(Formation, on_delete=models.CASCADE, related_name='user_formations')
 
+    def valider_par(self, validator):
+        """Validate the user's registration for the formation."""
+        self.valide_par = validator
+        self.valide_date = timezone.now()
+        self.state_formation = 'validated'
+        self.save()
+        # Create a notification for the user
+        Notification.objects.create(
+            user=self.user,
+            message=f"Your participation in '{self.formation.formation_titre}' has been validated."
+        )
+
+    def annuler_inscription(self):
+        """Cancel the user's registration for the formation."""
+        self.state_formation = 'cancelled'
+        self.save()
+        # Create a notification for the user
+        Notification.objects.create(
+            user=self.user,
+            message=f"Your participation in '{self.formation.formation_titre}' has been cancelled."
+        )
+
     def __str__(self):
         return f"{self.user.user_username} - {self.formation.formation_titre}"
+
+class Notification(models.Model):
+    objects = None
+    DoesNotExist = None
+    notification_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    message = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Notification for {self.user.user_username}: {self.message[:50]}"
+
+    class Meta:
+        ordering = ['-created_at']
