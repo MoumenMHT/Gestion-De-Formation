@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formations - Training Management System</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1a73e8;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #1a73e8;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #1a73e8;
+            padding-bottom: 10px;
+        }
+        .welcome {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+        .header-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .notification-container, .user-icon-container {
+            position: relative;
+            display: inline-block;
+        }
+        .notification-bell, .user-icon {
+            font-size: 24px;
+            color: #1a73e8;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .notification-bell:hover, .user-icon:hover {
+            color: #1565c0;
+        }
+        .notification-bell .badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 5px 8px;
+            font-size: 12px;
+        }
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            top: 30px;
+            right: 0;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        .notification-dropdown.show {
+            display: block;
+        }
+        .notification-item {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            position: relative;
+            cursor: pointer;
+        }
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        .notification-item p {
+            margin: 0;
+            color: #333;
+            font-size: 0.95em;
+        }
+        .notification-item .timestamp {
+            color: #777;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        .notification-item.read {
+            background-color: #f8f9fa;
+        }
+        .formation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .formation-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .formation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .formation-card h3 {
+            color: #1a73e8;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        .formation-card p {
+            color: #555;
+            margin: 5px 0;
+            font-size: 0.95em;
+        }
+        .formation-card .label {
+            font-weight: 500;
+            color: #333;
+        }
+        .participated-table, .employees-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+        .participated-table th, .participated-table td,
+        .employees-table th, .employees-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .participated-table th, .employees-table th {
+            background-color: #f8f9fa;
+            color: #1a73e8;
+            font-weight: 500;
+        }
+        .participated-table th.sortable, .employees-table th.sortable {
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+        .participated-table th.sortable:hover, .employees-table th.sortable:hover {
+            background-color: #e8ecef;
+        }
+        .participated-table th.sortable .sort-icon::after,
+        .employees-table th.sortable .sort-icon::after {
+            content: '↕';
+            margin-left: 5px;
+            font-size: 0.8em;
+        }
+        .participated-table th.sortable.asc .sort-icon::after,
+        .employees-table th.sortable.asc .sort-icon::after {
+            content: '↑';
+        }
+        .participated-table th.sortable.desc .sort-icon::after,
+        .employees-table th.sortable.desc .sort-icon::after {
+            content: '↓';
+        }
+        .participated-table td, .employees-table td {
+            color: #333;
+        }
+        .participated-table .state-pending {
+            color: #ffa500;
+            font-weight: 500;
+        }
+        .participated-table .state-validated {
+            color: #28a745;
+            font-weight: 500;
+        }
+        .participated-table .state-cancelled {
+            color: #dc3545;
+            font-weight: 500;
+        }
+        .participated-table .view-details-btn {
+            background-color: #1a73e8;
+            color: #ffffff;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .participated-table .view-details-btn:hover {
+            background-color: #1565c0;
+            transform: translateY(-1px);
+        }
+        .participated-table .view-details-btn:active {
+            transform: translateY(0);
+        }
+        .search-filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .search-container, .filter-container {
+            flex: 1;
+            min-width: 250px;
+        }
+        .search-container label, .filter-container label {
+            display: block;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .search-container input, .filter-container select {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        .search-container input:focus, .filter-container select:focus {
+            border-color: #1a73e8;
+            outline: none;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            border-radius: 12px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            color: #ffffff;
+            padding: 20px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            position: relative;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: 500;
+        }
+        .modal-content .close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 28px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .modal-content .close:hover {
+            color: #e0e0e0;
+        }
+        .modal-body {
+            padding: 25px;
+        }
+        .modal-body p {
+            margin: 12px 0;
+            color: #333;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+        .modal-body .label {
+            font-weight: 500;
+            color: #1a73e8;
+            display: inline-block;
+            width: 150px;
+        }
+        .modal-footer {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .modal-footer .participate-btn {
+            background-color: #1a73e8;
+            color: #ffffff;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-width: 150px;
+        }
+        .modal-footer .participate-btn:hover {
+            background-color: #1565c0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .modal-footer .participate-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .modal-footer .participate-btn:disabled {
+            background-color: #b0bec5;
+            color: #eceff1;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .modal-footer .message {
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        .modal-footer .message.success {
+            color: #155724;
+        }
+        .modal-footer .message.error {
+            color: #dc3545;
+        }
+        #userModal .modal-content {
+            max-width: 500px;
+        }
+        .logout {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .logout a {
+            color: #dc3545;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1em;
+        }
+        .logout a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Training Management System</h1>
+        <p class="welcome">Welcome, {{ user.user_username }}! (Role: {{ user.user_role|capfirst }})</p>
+
+        <div class="header-icons">
+            <div class="notification-container">
+                <span class="notification-bell">
+                    🔔
+                    {% if notifications.count > 0 %}
+                        <span class="badge">{{ notifications.count }}</span>
+                    {% endif %}
+                </span>
+                <div class="notification-dropdown" id="notificationDropdown">
+                    {% for notification in notifications %}
+                        <div class="notification-item" data-notification-id="{{ notification.pk }}">
+                            <p>{{ notification.message }}</p>
+                            <span class="timestamp">{{ notification.created_at|date:"Y-m-d H:i" }}</span>
+                        </div>
+                    {% empty %}
+                        <div class="notification-item">
+                            <p>No new notifications.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="user-icon-container">
+                <span class="user-icon" data-user-username="{{ user.user_username }}"
+                      data-user-email="{{ user.user_email }}"
+                      data-user-role="{{ user.user_role }}"
+                      data-user-nom="{{ user.user_lastname|default:'N/A' }}"
+                      data-user-prenom="{{ user.user_firstname|default:'N/A' }}"
+                      data-user-structure="{{ user.structure.structure_varchar|default:'N/A' }}"
+                      data-user-department="{{ user.department.department_name|default:'N/A' }}"
+                      data-user-state="{{ user.state|default:'N/A' }}">👤</span>
+            </div>
+        </div>
+
+        <h2>Available Formations</h2>
+        {% if formations %}
+            <div class="search-filter-container">
+                <div class="search-container">
+                    <label for="formation-search-available">Search by Formation Title</label>
+                    <input type="text" id="formation-search-available" placeholder="Enter formation title...">
+                </div>
+                <div class="filter-container">
+                    <label for="formation-level-filter">Filter by Level</label>
+                    <select id="formation-level-filter">
+                        <option value="">All Levels</option>
+                        {% for formation in formations %}
+                            {% if formation.formation_niveau %}
+                                <option value="{{ formation.formation_niveau }}">{{ formation.formation_niveau }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="formation-grid">
+                {% for formation in formations %}
+                    <div class="formation-card" data-formation-id="{{ formation.formation_id }}"
+                         data-title="{{ formation.formation_titre }}"
+                         data-ref="{{ formation.formation_ref }}"
+                         data-level="{{ formation.formation_niveau }}"
+                         data-country="{{ formation.formation_pays }}"
+                         data-duration="{{ formation.formation_duree }}"
+                         data-cost="{{ formation.formation_cout }}"
+                         data-description="{{ formation.formation_description }}"
+                         data-prerequisites="{{ formation.formation_prerequis|default:'None' }}"
+                         data-program="{{ formation.formation_programme|default:'None' }}"
+                         data-target="{{ formation.formation_cible|default:'None' }}"
+                         data-objective="{{ formation.formation_objectif|default:'None' }}"
+                         data-is-participated="false">
+                        <h3>{{ formation.formation_titre }}</h3>
+                        <p><span class="label">Reference:</span> {{ formation.formation_ref }}</p>
+                        <p><span class="label">Level:</span> {{ formation.formation_niveau }}</p>
+                        <p><span class="label">Country:</span> {{ formation.formation_pays }}</p>
+                        <p><span class="label">Duration:</span> {{ formation.formation_duree }} days</p>
+                        <p><span class="label">Cost:</span> {{ formation.formation_cout }} USD</p>
+                        <p><span class="label">Description:</span> {{ formation.formation_description|truncatewords:20 }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No formations available.</p>
+        {% endif %}
+
+        <h2>My Participated Formations</h2>
+        {% if user_formations %}
+            <div class="search-container">
+                <label for="formation-search">Search by Formation Title</label>
+                <input type="text" id="formation-search" placeholder="Enter formation title...">
+            </div>
+            <table class="participated-table">
+                <thead>
+                    <tr>
+                        <th>Formation Title</th>
+                        <th class="sortable" data-sort="state" data-direction="none"><span class="sort-icon">State</span></th>
+                        <th class="sortable" data-sort="date" data-direction="none"><span class="sort-icon">Date</span></th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user_formation in user_formations %}
+                        <tr>
+                            <td>{{ user_formation.formation.formation_titre }}</td>
+                            <td class="state-{{ user_formation.state_formation }}">{{ user_formation.state_formation|capfirst }}</td>
+                            <td>{{ user_formation.updated_at|date:"Y-m-d" }}</td>
+                            <td>
+                                <a href="#" class="view-details-btn" data-formation-id="{{ user_formation.formation.formation_id }}"
+                                   data-title="{{ user_formation.formation.formation_titre }}"
+                                   data-ref="{{ user_formation.formation.formation_ref }}"
+                                   data-level="{{ user_formation.formation.formation_niveau }}"
+                                   data-country="{{ user_formation.formation.formation_pays }}"
+                                   data-duration="{{ user_formation.formation.formation_duree }}"
+                                   data-cost="{{ user_formation.formation.formation_cout }}"
+                                   data-description="{{ user_formation.formation.formation_description }}"
+                                   data-prerequisites="{{ user_formation.formation.formation_prerequis|default:'None' }}"
+                                   data-program="{{ user_formation.formation.formation_programme|default:'None' }}"
+                                   data-target="{{ user_formation.formation.formation_cible|default:'None' }}"
+                                   data-objective="{{ user_formation.formation.formation_objectif|default:'None' }}"
+                                   data-is-participated="true">View Details</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>You have not participated in any formations.</p>
+        {% endif %}
+
+        {% if user.user_role == 'manager' or user.user_role == 'department_chief' %}
+        <h2>Users Under My Supervision</h2>
+        {% if subordinate_employees %}
+            <div class="search-container">
+                <label for="employee-search">Search by Username</label>
+                <input type="text" id="employee-search" placeholder="Enter username...">
+            </div>
+            <table class="employees-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="username" data-direction="none"><span class="sort-icon">Username</span></th>
+                        <th class="sortable" data-sort="email" data-direction="none"><span class="sort-icon">Email</span></th>
+                        <th class="sortable" data-sort="role" data-direction="none"><span class="sort-icon">Role</span></th>
+                        <th class="sortable" data-sort="department" data-direction="none"><span class="sort-icon">Department</span></th>
+                        <th class="sortable" data-sort="structure" data-direction="none"><span class="sort-icon">Structure</span></th>
+                        <th>Formations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in subordinate_employees %}
+                        <tr>
+                            <td>{{ employee.user_username }}</td>
+                            <td>{{ employee.user_email }}</td>
+                            <td>{{ employee.user_role|capfirst }}</td>
+                            <td>{{ employee.department.department_name|default:'N/A' }}</td>
+                            <td>{{ employee.structure.structure_varchar|default:'N/A' }}</td>
+                            <td>
+                                {% with employee_formations=employee.user_formations.all %}
+                                    {% if employee_formations %}
+                                        <ul style="margin: 0; padding-left: 20px;">
+                                            {% for uf in employee_formations %}
+                                                <li>{{ uf.formation.formation_titre }} ({{ uf.state_formation|capfirst }})</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        None
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No users under your supervision.</p>
+        {% endif %}
+        {% endif %}
+
+        <div id="formationModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title"></h3>
+                    <span class="close">×</span>
+                </div>
+                <div class="modal-body">
+                    <p><span class="label">Reference:</span> <span id="modal-ref"></span></p>
+                    <p><span class="label">Level:</span> <span id="modal-level"></span></p>
+                    <p><span class="label">Country:</span> <span id="modal-country"></span></p>
+                    <p><span class="label">Duration:</span> <span id="modal-duration"></span> days</p>
+                    <p><span class="label">Cost:</span> <span id="modal-cost"></span> USD</p>
+                    <p><span class="label">Description:</span> <span id="modal-description"></span></p>
+                    <p><span class="label">Prerequisites:</span> <span id="modal-prerequisites"></span></p>
+                    <p><span class="label">Program:</span> <span id="modal-program"></span></p>
+                    <p><span class="label">Target:</span> <span id="modal-target"></span></p>
+                    <p><span class="label">Objective:</span> <span id="modal-objective"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button class="participate-btn" id="participateBtn">Participate</button>
+                    <div id="modal-message" class="message"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="userModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>User Profile</h3>
+                    <span class="close">×</span>
+                </div>
+                <div class="modal-body" id="userModalBody"></div>
+            </div>
+        </div>
+
+        <div class="logout">
+            <a href="{% url 'users:logout' %}">Logout</a>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to get CSRF token
+        function getCsrfToken() {
+            const token = document.querySelector('meta[name="csrf-token"]')?.content ||
+                          '{{ csrf_token }}';
+            return token;
+        }
+
+        // DOM elements
+        const formationModal = document.getElementById('formationModal');
+        const userModal = document.getElementById('userModal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalRef = document.getElementById('modal-ref');
+        const modalLevel = document.getElementById('modal-level');
+        const modalCountry = document.getElementById('modal-country');
+        const modalDuration = document.getElementById('modal-duration');
+        const modalCost = document.getElementById('modal-cost');
+        const modalDescription = document.getElementById('modal-description');
+        const modalPrerequisites = document.getElementById('modal-prerequisites');
+        const modalProgram = document.getElementById('modal-program');
+        const modalTarget = document.getElementById('modal-target');
+        const modalObjective = document.getElementById('modal-objective');
+        const modalMessage = document.getElementById('modal-message');
+        const participateBtn = document.getElementById('participateBtn');
+        const closeButtons = document.getElementsByClassName('close');
+        const notificationBell = document.querySelector('.notification-bell');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const userIcon = document.querySelector('.user-icon');
+        const searchInputParticipated = document.getElementById('formation-search');
+        const searchInputAvailable = document.getElementById('formation-search-available');
+        const levelFilter = document.getElementById('formation-level-filter');
+        const searchInputEmployees = document.getElementById('employee-search');
+
+        let currentFormationId = null;
+
+        // Close modal function
+        function closeModals() {
+            if (formationModal) formationModal.style.display = 'none';
+            if (userModal) userModal.style.display = 'none';
+        }
+
+        // Notification dropdown toggle
+        if (notificationBell) {
+            notificationBell.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const badge = notificationBell.querySelector('.badge');
+                if (badge) badge.remove();
+                notificationDropdown.classList.toggle('show');
+            });
+        }
+
+        // Close notification dropdown when clicking outside
+        document.addEventListener('click', (event) => {
+            if (notificationBell && notificationDropdown &&
+                !notificationBell.contains(event.target) &&
+                !notificationDropdown.contains(event.target)) {
+                notificationDropdown.classList.remove('show');
+            }
+        });
+
+        // Mark notification as read
+        document.querySelectorAll('.notification-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const notificationId = item.getAttribute('data-notification-id');
+                if (notificationId) {
+                    fetch("{% url 'users:mark_notification_read' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCsrfToken()
+                        },
+                        body: JSON.stringify({ notification_id: notificationId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            item.classList.add('read');
+                            const remainingItems = notificationDropdown.querySelectorAll('.notification-item[data-notification-id]');
+                            if (remainingItems.length === 0) {
+                                notificationDropdown.innerHTML = `
+                                    <div class="notification-item">
+                                        <p>No new notifications.</p>
+                                    </div>
+                                `;
+                            }
+                        } else {
+                            console.error('Failed to mark notification as read:', data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error marking notification as read:', error));
+                }
+            });
+        });
+
+        // Search for participated formations
+        if (searchInputParticipated) {
+            searchInputParticipated.addEventListener('input', () => {
+                const query = searchInputParticipated.value.toLowerCase();
+                const rows = document.querySelectorAll('.participated-table tbody tr');
+                rows.forEach(row => {
+                    const title = row.querySelector('td:first-child').textContent.toLowerCase();
+                    row.style.display = title.includes(query) ? '' : 'none';
+                });
+            });
+        }
+
+        // Update formation grid based on search and filter
+        function updateFormationGrid() {
+            const searchQuery = searchInputAvailable ? searchInputAvailable.value.toLowerCase() : '';
+            const selectedLevel = levelFilter ? levelFilter.value : '';
+            const cards = document.querySelectorAll('.formation-card');
+            cards.forEach(card => {
+                const title = card.getAttribute('data-title')?.toLowerCase() || '';
+                const level = card.getAttribute('data-level') || '';
+                const matchesSearch = title.includes(searchQuery);
+                const matchesFilter = selectedLevel === '' || level === selectedLevel;
+                card.style.display = matchesSearch && matchesFilter ? '' : 'none';
+            });
+        }
+
+        if (searchInputAvailable) {
+            searchInputAvailable.addEventListener('input', updateFormationGrid);
+        }
+
+        if (levelFilter) {
+            levelFilter.addEventListener('change', updateFormationGrid);
+            // Remove duplicate options
+            const options = Array.from(levelFilter.options);
+            const uniqueValues = new Set();
+            options.forEach(opt => {
+                if (opt.value && uniqueValues.has(opt.value)) {
+                    opt.remove();
+                } else {
+                    uniqueValues.add(opt.value);
+                }
+            });
+        }
+
+        // Search for employees
+        if (searchInputEmployees) {
+            searchInputEmployees.addEventListener('input', () => {
+                const query = searchInputEmployees.value.toLowerCase();
+                const rows = document.querySelectorAll('.employees-table tbody tr');
+                rows.forEach(row => {
+                    const username = row.querySelector('td:first-child').textContent.toLowerCase();
+                    row.style.display = username.includes(query) ? '' : 'none';
+                });
+            });
+        }
+
+        // Table sorting function
+        function sortTable(tableSelector, sortKey, direction) {
+            const tbody = document.querySelector(`${tableSelector} tbody`);
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            rows.sort((a, b) => {
+                let aValue, bValue;
+                if (tableSelector === '.participated-table') {
+                    if (sortKey === 'state') {
+                        aValue = a.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                        bValue = b.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    } else if (sortKey === 'date') {
+                        aValue = new Date(a.querySelector('td:nth-child(3)').textContent);
+                        bValue = new Date(b.querySelector('td:nth-child(3)').textContent);
+                    }
+                } else if (tableSelector === '.employees-table') {
+                    if (sortKey === 'username') {
+                        aValue = a.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                        bValue = b.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                    } else if (sortKey === 'email') {
+                        aValue = a.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                        bValue = b.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    } else if (sortKey === 'role') {
+                        aValue = a.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                        bValue = b.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                    } else if (sortKey === 'department') {
+                        aValue = a.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                        bValue = b.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                    } else if (sortKey === 'structure') {
+                        aValue = a.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                        bValue = b.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                    }
+                }
+                if (!aValue || !bValue) return 0;
+                return direction === 'asc' ?
+                    (aValue.localeCompare ? aValue.localeCompare(bValue) : aValue - bValue) :
+                    (bValue.localeCompare ? bValue.localeCompare(aValue) : bValue - aValue);
+            });
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Attach sorting event listeners
+        document.querySelectorAll('.participated-table th.sortable, .employees-table th.sortable').forEach(header => {
+            header.addEventListener('click', () => {
+                const tableSelector = header.closest('table').classList.contains('participated-table') ?
+                                     '.participated-table' : '.employees-table';
+                const sortKey = header.getAttribute('data-sort');
+                const currentDirection = header.getAttribute('data-direction');
+                const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+                header.setAttribute('data-direction', newDirection);
+                header.classList.remove('asc', 'desc');
+                header.classList.add(newDirection);
+                document.querySelectorAll(`${tableSelector} th.sortable`).forEach(h => {
+                    if (h !== header) {
+                        h.setAttribute('data-direction', 'none');
+                        h.classList.remove('asc', 'desc');
+                    }
+                });
+                sortTable(tableSelector, sortKey, newDirection);
+                // Reapply search filter after sorting
+                if (tableSelector === '.participated-table' && searchInputParticipated && searchInputParticipated.value) {
+                    const query = searchInputParticipated.value.toLowerCase();
+                    const rows = document.querySelectorAll('.participated-table tbody tr');
+                    rows.forEach(row => {
+                        const title = row.querySelector('td:first-child').textContent.toLowerCase();
+                        row.style.display = title.includes(query) ? '' : 'none';
+                    });
+                } else if (tableSelector === '.employees-table' && searchInputEmployees && searchInputEmployees.value) {
+                    const query = searchInputEmployees.value.toLowerCase();
+                    const rows = document.querySelectorAll('.employees-table tbody tr');
+                    rows.forEach(row => {
+                        const username = row.querySelector('td:first-child').textContent.toLowerCase();
+                        row.style.display = username.includes(query) ? '' : 'none';
+                    });
+                }
+            });
+        });
+
+        // Open formation modal
+        function openFormationModal(element) {
+            currentFormationId = element.getAttribute('data-formation-id');
+            modalTitle.textContent = element.getAttribute('data-title') || 'N/A';
+            modalRef.textContent = element.getAttribute('data-ref') || 'N/A';
+            modalLevel.textContent = element.getAttribute('data-level') || 'N/A';
+            modalCountry.textContent = element.getAttribute('data-country') || 'N/A';
+            modalDuration.textContent = element.getAttribute('data-duration') || 'N/A';
+            modalCost.textContent = element.getAttribute('data-cost') || 'N/A';
+            modalDescription.textContent = element.getAttribute('data-description') || 'N/A';
+            modalPrerequisites.textContent = element.getAttribute('data-prerequisites') || 'None';
+            modalProgram.textContent = element.getAttribute('data-program') || 'None';
+            modalTarget.textContent = element.getAttribute('data-target') || 'None';
+            modalObjective.textContent = element.getAttribute('data-objective') || 'None';
+            const isParticipated = element.getAttribute('data-is-participated') === 'true';
+            if (participateBtn) {
+                participateBtn.disabled = isParticipated;
+            }
+            if (modalMessage) {
+                modalMessage.textContent = isParticipated ? 'You are already enrolled in this formation.' : '';
+                modalMessage.className = isParticipated ? 'message' : 'message';
+            }
+            if (formationModal) {
+                formationModal.style.display = 'flex';
+            }
+            if (userModal) {
+                userModal.style.display = 'none';
+            }
+        }
+
+        // Open user modal
+        function openUserModal(element) {
+            const userData = {
+                'Username': element.getAttribute('data-user-username') || 'N/A',
+                'Email': element.getAttribute('data-user-email') || 'N/A',
+                'Role': element.getAttribute('data-user-role') || 'N/A',
+                'First Name': element.getAttribute('data-user-prenom') || 'N/A',
+                'Last Name': element.getAttribute('data-user-nom') || 'N/A',
+                'Structure': element.getAttribute('data-user-structure') || 'N/A',
+                'Department': element.getAttribute('data-user-department') || 'N/A',
+                'State': element.getAttribute('data-user-state') || 'N/A'
+            };
+            const modalBody = document.getElementById('userModalBody');
+            if (modalBody) {
+                modalBody.innerHTML = '';
+                for (const [key, value] of Object.entries(userData)) {
+                    if (value && value !== 'N/A') {
+                        const p = document.createElement('p');
+                        p.innerHTML = `<span class="label">${key}:</span> ${value}`;
+                        modalBody.appendChild(p);
+                    }
+                }
+            }
+            if (userModal) {
+                userModal.style.display = 'flex';
+            }
+            if (formationModal) {
+                formationModal.style.display = 'none';
+            }
+        }
+
+        // Attach event listeners
+        if (userIcon) {
+            userIcon.addEventListener('click', () => openUserModal(userIcon));
+        }
+
+        document.querySelectorAll('.formation-card').forEach(card => {
+            card.addEventListener('click', () => openFormationModal(card));
+        });
+
+        document.querySelectorAll('.view-details-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openFormationModal(btn);
+            });
+        });
+
+        Array.from(closeButtons).forEach(btn => {
+            btn.addEventListener('click', closeModals);
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === formationModal || event.target === userModal) {
+                closeModals();
+            }
+        });
+
+        // Participate button handler
+        if (participateBtn) {
+            participateBtn.addEventListener('click', () => {
+                if (!currentFormationId) {
+                    modalMessage.textContent = 'No formation selected.';
+                    modalMessage.className = 'message error';
+                    return;
+                }
+                fetch("{% url 'users:participate_formation' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ formation_id: currentFormationId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    modalMessage.textContent = data.message;
+                    modalMessage.className = `message ${data.status}`;
+                    if (data.status === 'success') {
+                        participateBtn.disabled = true;
+                        // Update the formation card to reflect participation
+                        const card = document.querySelector(`.formation-card[data-formation-id="${currentFormationId}"]`);
+                        if (card) {
+                            card.setAttribute('data-is-participated', 'true');
+                        }
+                    }
+                })
+                .catch(error => {
+                    modalMessage.textContent = 'An error occurred. Please try again.';
+                    modalMessage.className = 'message error';
+                    console.error('Error participating in formation:', error);
+                });
+            });
+        }
+    </script>
+</body>
+</html>

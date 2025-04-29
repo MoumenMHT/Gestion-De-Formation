@@ -1,123 +1,328 @@
-<!DOCTYPE html>
-   <html lang="en">
-   <head>
-       <meta charset="UTF-8">
-       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-       <title>Login - Training Management System</title>
-       <style>
-           body {
-               font-family: 'Roboto', sans-serif;
-               background-color: #f4f6f9;
-               display: flex;
-               justify-content: center;
-               align-items: center;
-               height: 100vh;
-               margin: 0;
-           }
-           .login-container {
-               background-color: #ffffff;
-               padding: 40px;
-               border-radius: 8px;
-               box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-               width: 100%;
-               max-width: 400px;
-           }
-           .login-container h2 {
-               text-align: center;
-               color: #1a73e8;
-               margin-bottom: 20px;
-           }
-           .form-group {
-               margin-bottom: 20px;
-           }
-           .form-group label {
-               display: block;
-               color: #333;
-               font-weight: 500;
-               margin-bottom: 5px;
-           }
-           .form-group input {
-               width: 100%;
-               padding: 10px;
-               border: 1px solid #d1d5db;
-               border-radius: 4px;
-               box-sizing: border-box;
-           }
-           .form-group input:focus {
-               border-color: #1a73e8;
-               outline: none;
-               box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
-           }
-           .form-group button {
-               width: 100%;
-               padding: 12px;
-               background-color: #1a73e8;
-               border: none;
-               border-radius: 4px;
-               color: #ffffff;
-               font-size: 16px;
-               cursor: pointer;
-           }
-           .form-group button:hover {
-               background-color: #1565c0;
-           }
-           .messages {
-               margin-bottom: 20px;
-           }
-           .messages .error {
-               color: #dc3545;
-               background-color: #f8d7da;
-               padding: 10px;
-               border-radius: 4px;
-               text-align: center;
-           }
-           .messages .success {
-               color: #155724;
-               background-color: #d4edda;
-               padding: 10px;
-               border-radius: 4px;
-               text-align: center;
-           }
-           .admin-login {
-               text-align: center;
-               margin-top: 20px;
-           }
-           .admin-login a {
-               color: #1a73e8;
-               text-decoration: none;
-           }
-           .admin-login a:hover {
-               text-decoration: underline;
-           }
-       </style>
-   </head>
-   <body>
-       <div class="login-container">
-           <h2>Login to Training System</h2>
-           {% if messages %}
-               <div class="messages">
-                   {% for message in messages %}
-                       <div class="{{ message.tags }}">{{ message }}</div>
-                   {% endfor %}
-               </div>
-           {% endif %}
-           <form method="post">
-               {% csrf_token %}
-               <div class="form-group">
-                   <label for="email">Email</label>
-                   <input type="email" id="email" name="email" required>
-               </div>
-               <div class="form-group">
-                   <label for="password">Password</label>
-                   <input type="password" id="password" name="password" required>
-               </div>
-               <div class="form-group">
-                   <button type="submit">Login</button>
-               </div>
-           </form>
-           <div class="admin-login">
-               <p>Are you a DRH? <a href="{% url 'admin:login' %}">Login to Admin Panel</a></p>
-           </div>
-       </div>
-   </body>
-   </html>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login - Training Management System</title>
+        <style>
+            body {
+                font-family: 'Roboto', sans-serif;
+                background-color: #f4f6f9;
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+            }
+            .login-container {
+                background-color: #ffffff;
+                padding: 40px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                width: 100%;
+                max-width: 400px;
+            }
+            h1 {
+                color: #1a73e8;
+                text-align: center;
+                margin-bottom: 30px;
+            }
+            .form-group {
+                margin-bottom: 20px;
+            }
+            .form-group label {
+                display: block;
+                color: #333;
+                margin-bottom: 8px;
+                font-weight: 500;
+            }
+            .form-group input, .form-group select {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 1em;
+            }
+            .form-group input:focus, .form-group select:focus {
+                border-color: #1a73e8;
+                outline: none;
+            }
+            .form-group .error {
+                color: #dc3545;
+                font-size: 0.85em;
+                margin-top: 5px;
+                display: none;
+            }
+            .form-group .error.show {
+                display: block;
+            }
+            .login-btn, .register-btn {
+                width: 100%;
+                padding: 12px;
+                background-color: #1a73e8;
+                color: #ffffff;
+                border: none;
+                border-radius: 4px;
+                font-size: 1em;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s;
+                margin-bottom: 10px;
+            }
+            .login-btn:hover, .register-btn:hover {
+                background-color: #1565c0;
+            }
+            .message {
+                text-align: center;
+                margin-bottom: 20px;
+                font-weight: 500;
+            }
+            .message.success {
+                color: #155724;
+            }
+            .message.error {
+                color: #dc3545;
+            }
+            /* Modal */
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.6);
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+            .modal-content {
+                background-color: #ffffff;
+                border-radius: 12px;
+                max-width: 500px;
+                width: 90%;
+                max-height: 85vh;
+                overflow-y: auto;
+                position: relative;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            }
+            .modal-header {
+                background: linear-gradient(135deg, #1a73e8, #0d47a1);
+                color: #ffffff;
+                padding: 20px;
+                border-top-left-radius: 12px;
+                border-top-right-radius: 12px;
+                position: relative;
+            }
+            .modal-header h2 {
+                margin: 0;
+                font-size: 1.5em;
+                font-weight: 500;
+            }
+            .modal-content .close {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                font-size: 28px;
+                color: #ffffff;
+                cursor: pointer;
+                transition: color 0.2s;
+            }
+            .modal-content .close:hover {
+                color: #e0e0e0;
+            }
+            .modal-body {
+                padding: 25px;
+            }
+            .modal-footer {
+                padding: 20px;
+                text-align: center;
+                border-top: 1px solid #e0e0e0;
+            }
+            .modal-footer .submit-btn {
+                background-color: #1a73e8;
+                color: #ffffff;
+                padding: 12px 30px;
+                border: none;
+                border-radius: 6px;
+                font-size: 1em;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+            .modal-footer .submit-btn:hover {
+                background-color: #1565c0;
+            }
+            .modal-footer .message {
+                margin-top: 10px;
+                font-weight: 500;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-container">
+            <h1>Login</h1>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+            <button class="register-btn" onclick="openRegisterModal()">Register</button>
+        </div>
+
+        <!-- Registration Modal -->
+        <div id="registerModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Register New Account</h2>
+                    <span class="close" onclick="closeRegisterModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="user_email">Email</label>
+                            <input type="email" id="user_email" name="user_email" required>
+                            <div class="error" id="error-user_email"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="user_username">Username</label>
+                            <input type="text" id="user_username" name="user_username" required>
+                            <div class="error" id="error-user_username"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="user_firstname">First Name</label>
+                            <input type="text" id="user_firstname" name="user_firstname" required>
+                            <div class="error" id="error-user_firstname"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="user_lastname">Last Name</label>
+                            <input type="text" id="user_lastname" name="user_lastname" required>
+                            <div class="error" id="error-user_lastname"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="user_role">Role</label>
+                            <select id="user_role" name="user_role" required>
+                                <option value="">Select Role</option>
+                                <option value="Employee">Employee</option>
+                                <option value="manager">Manager</option>
+                                <option value="department_chief">Department Chief</option>
+                                <option value="DRH">DRH</option>
+                            </select>
+                            <div class="error" id="error-user_role"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="structure">Structure</label>
+                            <select id="structure" name="structure" required>
+                                <option value="">Select Structure</option>
+                                {% for structure in structures %}
+                                    <option value="{{ structure.pk }}">{{ structure.structure_varchar }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="error" id="error-structure"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="structure">Department</label>
+                            <select id="structure" name="department" required>
+                                <option value="">Select Department</option>
+                                {% for department in departments %}
+                                    <option value="{{ department.pk }}">{{ department.department_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="error" id="error-structure"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required>
+                            <div class="error" id="error-password"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm_password">Confirm Password</label>
+                            <input type="password" id="confirm_password" name="confirm_password" required>
+                            <div class="error" id="error-confirm_password"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="submit-btn" onclick="submitRegistration()">Submit</button>
+                    <div id="registerMessage" class="message"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function openRegisterModal() {
+                document.getElementById('registerModal').style.display = 'flex';
+                document.getElementById('registerForm').reset();
+                document.getElementById('registerMessage').textContent = '';
+                document.querySelectorAll('.error').forEach(error => error.classList.remove('show'));
+            }
+
+            function closeRegisterModal() {
+                document.getElementById('registerModal').style.display = 'none';
+            }
+
+            function submitRegistration() {
+                const form = document.getElementById('registerForm');
+                const formData = new FormData(form);
+                const messageDiv = document.getElementById('registerMessage');
+
+                // Clear previous errors
+                document.querySelectorAll('.error').forEach(error => {
+                    error.textContent = '';
+                    error.classList.remove('show');
+                });
+
+                fetch("{% url 'users:register' %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        messageDiv.textContent = data.message;
+                        messageDiv.className = 'message success';
+                        form.reset();
+                        setTimeout(closeRegisterModal, 2000);
+                    } else {
+                        messageDiv.textContent = data.message;
+                        messageDiv.className = 'message error';
+                        if (data.errors) {
+                            Object.keys(data.errors).forEach(field => {
+                                const errorDiv = document.getElementById(`error-${field}`);
+                                errorDiv.textContent = data.errors[field][0].message;
+                                errorDiv.classList.add('show');
+                            });
+                        }
+                    }
+                })
+                .catch(error => {
+                    messageDiv.textContent = 'An error occurred. Please try again.';
+                    messageDiv.className = 'message error';
+                });
+            }
+
+            // Close modal when clicking outside
+            window.addEventListener('click', (event) => {
+                if (event.target === document.getElementById('registerModal')) {
+                    closeRegisterModal();
+                }
+            });
+        </script>
+    </body>
+    </html>

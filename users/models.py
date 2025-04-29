@@ -1,3 +1,4 @@
+# users/models.py
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
@@ -17,43 +18,20 @@ class UserManager(BaseUserManager):
     def create_user(self, user_email, user_username, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
+        extra_fields.setdefault('is_active', False)
+        extra_fields.setdefault('state', 'pending')
         return self._create_user(user_email, user_username, password, **extra_fields)
 
     def create_superuser(self, user_email, user_username, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-
+        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('state', 'approved')
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
-
         return self._create_user(user_email, user_username, password, **extra_fields)
-
-class User(AbstractBaseUser, PermissionsMixin):
-    user_id = models.AutoField(primary_key=True)
-    user_firstname = models.CharField(max_length=50)
-    user_lastname = models.CharField(max_length=50)
-    user_username = models.CharField(max_length=50, unique=True)
-    user_email = models.EmailField(unique=True)
-    user_password = models.CharField(max_length=128)  # Handled by set_password
-    user_cree_par = models.CharField(max_length=50, blank=True, null=True)
-    user_cree_date = models.DateTimeField(default=timezone.now)
-    user_miseajour_par = models.CharField(max_length=50, blank=True, null=True)
-    user_miseajour_date = models.DateTimeField(auto_now=True, null=True)
-    user_role = models.CharField(max_length=50)
-    structure = models.ForeignKey('Structure', on_delete=models.CASCADE, related_name='users', null=True)
-
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-
-    objects = UserManager()
-
-    USERNAME_FIELD = 'user_email'
-    REQUIRED_FIELDS = ['user_username', 'user_firstname', 'user_lastname', 'user_role']
-
-    def __str__(self):
-        return self.user_username
 
 class Structure(models.Model):
     structure_id = models.AutoField(primary_key=True)
@@ -67,6 +45,58 @@ class Structure(models.Model):
 
     def __str__(self):
         return self.structure_varchar
+
+class Department(models.Model):
+    department_id = models.AutoField(primary_key=True)
+    department_name = models.CharField(max_length=255)
+    department_code = models.CharField(max_length=50, unique=True)
+    structure = models.ForeignKey(Structure, on_delete=models.CASCADE, related_name='departments')
+    department_cree_par = models.CharField(max_length=50, blank=True, null=True)
+    department_cree_date = models.DateTimeField(default=timezone.now)
+    department_miseajour_par = models.CharField(max_length=50, blank=True, null=True)
+    department_miseajour_date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.department_name} ({self.structure.structure_varchar})"
+
+class User(AbstractBaseUser, PermissionsMixin):
+    user_id = models.AutoField(primary_key=True)
+    user_firstname = models.CharField(max_length=50)
+    user_lastname = models.CharField(max_length=50)
+    user_username = models.CharField(max_length=50, unique=True)
+    user_email = models.EmailField(unique=True)
+    user_password = models.CharField(max_length=128)
+    user_cree_par = models.CharField(max_length=50, blank=True, null=True)
+    user_cree_date = models.DateTimeField(default=timezone.now)
+    user_miseajour_par = models.CharField(max_length=50, blank=True, null=True)
+    user_miseajour_date = models.DateTimeField(auto_now=True, null=True)
+    user_role = models.CharField(max_length=50, choices=[
+        ('employee', 'Employee'),
+        ('manager', 'Manager'),
+        ('department_chief', 'Department Chief'),
+        ('DRH', 'DRH'),
+    ])
+    structure = models.ForeignKey(Structure, on_delete=models.SET_NULL, related_name='users', null=True)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, related_name='users', null=True, blank=True)
+    state = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('approved', 'Approved'),
+            ('rejected', 'Rejected')
+        ],
+        default='pending'
+    )
+    is_active = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = 'user_email'
+    REQUIRED_FIELDS = ['user_username', 'user_firstname', 'user_lastname', 'user_role']
+
+    def __str__(self):
+        return self.user_username
 
 class Formation(models.Model):
     formation_id = models.AutoField(primary_key=True)
@@ -84,7 +114,7 @@ class Formation(models.Model):
     formation_cible = models.TextField(blank=True, null=True)
     formation_objectif = models.TextField(blank=True, null=True)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='formations', null=True)
-    structure = models.ForeignKey('Structure', on_delete=models.CASCADE, related_name='formations')
+    structure = models.ForeignKey(Structure, on_delete=models.CASCADE, related_name='formations')
 
     def __str__(self):
         return self.formation_titre
@@ -99,22 +129,18 @@ class UserFormation(models.Model):
     formation = models.ForeignKey(Formation, on_delete=models.CASCADE, related_name='user_formations')
 
     def valider_par(self, validator):
-        """Validate the user's registration for the formation."""
         self.valide_par = validator
         self.valide_date = timezone.now()
         self.state_formation = 'validated'
         self.save()
-        # Create a notification for the user
         Notification.objects.create(
             user=self.user,
             message=f"Your participation in '{self.formation.formation_titre}' has been validated."
         )
 
     def annuler_inscription(self):
-        """Cancel the user's registration for the formation."""
         self.state_formation = 'cancelled'
         self.save()
-        # Create a notification for the user
         Notification.objects.create(
             user=self.user,
             message=f"Your participation in '{self.formation.formation_titre}' has been cancelled."
@@ -124,8 +150,6 @@ class UserFormation(models.Model):
         return f"{self.user.user_username} - {self.formation.formation_titre}"
 
 class Notification(models.Model):
-    objects = None
-    DoesNotExist = None
     notification_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     message = models.TextField()
