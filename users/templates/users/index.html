@@ -4,238 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formations - Training Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
         }
-        h1 {
-            color: #1a73e8;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        h2 {
-            color: #1a73e8;
-            margin-top: 40px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #1a73e8;
-            padding-bottom: 10px;
-        }
-        .welcome {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 1.2em;
-        }
-        .header-icons {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .notification-container, .user-icon-container {
-            position: relative;
-            display: inline-block;
-        }
-        .notification-bell, .user-icon {
-            font-size: 24px;
-            color: #1a73e8;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .notification-bell:hover, .user-icon:hover {
-            color: #1565c0;
-        }
-        .notification-bell .badge {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background-color: #dc3545;
-            color: white;
-            border-radius: 50%;
-            padding: 5px 8px;
-            font-size: 12px;
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
         }
         .notification-dropdown {
             display: none;
             position: absolute;
-            top: 30px;
+            top: 2rem;
             right: 0;
-            background-color: #ffffff;
-            border-radius: 8px;
+            background-color: white;
+            border-radius: 0.5rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            max-height: 400px;
+            width: 20rem;
+            max-height: 24rem;
             overflow-y: auto;
             z-index: 1000;
         }
         .notification-dropdown.show {
             display: block;
-        }
-        .notification-item {
-            padding: 15px;
-            border-bottom: 1px solid #e0e0e0;
-            position: relative;
-            cursor: pointer;
-        }
-        .notification-item:last-child {
-            border-bottom: none;
-        }
-        .notification-item p {
-            margin: 0;
-            color: #333;
-            font-size: 0.95em;
-        }
-        .notification-item .timestamp {
-            color: #777;
-            font-size: 0.85em;
-            margin-top: 5px;
-        }
-        .notification-item.read {
-            background-color: #f8f9fa;
-        }
-        .formation-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        .formation-card {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-        .formation-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .formation-card h3 {
-            color: #1a73e8;
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 1.3em;
-        }
-        .formation-card p {
-            color: #555;
-            margin: 5px 0;
-            font-size: 0.95em;
-        }
-        .formation-card .label {
-            font-weight: 500;
-            color: #333;
-        }
-        .participated-table, .employees-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 40px;
-        }
-        .participated-table th, .participated-table td,
-        .employees-table th, .employees-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        .participated-table th, .employees-table th {
-            background-color: #f8f9fa;
-            color: #1a73e8;
-            font-weight: 500;
-        }
-        .participated-table th.sortable, .employees-table th.sortable {
-            cursor: pointer;
-            position: relative;
-            user-select: none;
-        }
-        .participated-table th.sortable:hover, .employees-table th.sortable:hover {
-            background-color: #e8ecef;
-        }
-        .participated-table th.sortable .sort-icon::after,
-        .employees-table th.sortable .sort-icon::after {
-            content: '↕';
-            margin-left: 5px;
-            font-size: 0.8em;
-        }
-        .participated-table th.sortable.asc .sort-icon::after,
-        .employees-table th.sortable.asc .sort-icon::after {
-            content: '↑';
-        }
-        .participated-table th.sortable.desc .sort-icon::after,
-        .employees-table th.sortable.desc .sort-icon::after {
-            content: '↓';
-        }
-        .participated-table td, .employees-table td {
-            color: #333;
-        }
-        .participated-table .state-pending {
-            color: #ffa500;
-            font-weight: 500;
-        }
-        .participated-table .state-validated {
-            color: #28a745;
-            font-weight: 500;
-        }
-        .participated-table .state-cancelled {
-            color: #dc3545;
-            font-weight: 500;
-        }
-        .participated-table .view-details-btn {
-            background-color: #1a73e8;
-            color: #ffffff;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.9em;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-        .participated-table .view-details-btn:hover {
-            background-color: #1565c0;
-            transform: translateY(-1px);
-        }
-        .participated-table .view-details-btn:active {
-            transform: translateY(0);
-        }
-        .search-filter-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .search-container, .filter-container {
-            flex: 1;
-            min-width: 250px;
-        }
-        .search-container label, .filter-container label {
-            display: block;
-            color: #333;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        .search-container input, .filter-container select {
-            width: 100%;
-            max-width: 300px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1em;
-        }
-        .search-container input:focus, .filter-container select:focus {
-            border-color: #1a73e8;
-            outline: none;
         }
         .modal {
             display: none;
@@ -244,351 +45,325 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.5);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
-        .modal-content {
-            background-color: #ffffff;
-            border-radius: 12px;
-            max-width: 700px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-        }
-        .modal-header {
-            background: linear-gradient(135deg, #1a73e8, #0d47a1);
-            color: #ffffff;
-            padding: 20px;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
-            position: relative;
-        }
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.5em;
-            font-weight: 500;
-        }
-        .modal-content .close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 28px;
-            color: #ffffff;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .modal-content .close:hover {
-            color: #e0e0e0;
-        }
-        .modal-body {
-            padding: 25px;
-        }
-        .modal-body p {
-            margin: 12px 0;
-            color: #333;
-            font-size: 1em;
-            line-height: 1.6;
-        }
-        .modal-body .label {
-            font-weight: 500;
-            color: #1a73e8;
-            display: inline-block;
-            width: 150px;
-        }
-        .modal-footer {
-            padding: 20px;
+        .modal.show {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            gap: 10px;
-            border-top: 1px solid #e0e0e0;
         }
-        .modal-footer .participate-btn {
-            background-color: #1a73e8;
-            color: #ffffff;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1em;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            min-width: 150px;
+        .modal-content {
+            background-color: white;
+            border-radius: 0.75rem;
+            max-width: 36rem;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
         }
-        .modal-footer .participate-btn:hover {
-            background-color: #1565c0;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        .sortable:hover {
+            background-color: #f1f5f9;
         }
-        .modal-footer .participate-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .sortable.asc::after {
+            content: '↑';
+            margin-left: 0.5rem;
         }
-        .modal-footer .participate-btn:disabled {
-            background-color: #b0bec5;
-            color: #eceff1;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
+        .sortable.desc::after {
+            content: '↓';
+            margin-left: 0.5rem;
         }
-        .modal-footer .message {
-            margin-top: 10px;
-            font-weight: 500;
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
         }
-        .modal-footer .message.success {
-            color: #155724;
-        }
-        .modal-footer .message.error {
-            color: #dc3545;
-        }
-        #userModal .modal-content {
-            max-width: 500px;
-        }
-        .logout {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .logout a {
-            color: #dc3545;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 1em;
-        }
-        .logout a:hover {
-            text-decoration: underline;
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Training Management System</h1>
-        <p class="welcome">Welcome, {{ user.user_username }}! (Role: {{ user.user_role|capfirst }})</p>
-
-        <div class="header-icons">
-            <div class="notification-container">
-                <span class="notification-bell">
-                    🔔
-                    {% if notifications.count > 0 %}
-                        <span class="badge">{{ notifications.count }}</span>
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar fixed md:sticky top-0 left-0 w-64 bg-white shadow-lg h-screen p-6 md:transform-none z-20" id="sidebar">
+            <div class="flex items-center mb-8">
+                <h2 class="text-xl font-bold text-blue-600">TMS</h2>
+                <button class="md:hidden ml-auto text-blue-600" id="toggleSidebar">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <nav>
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#available-formations" class="block p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600">Available Formations</a>
+                    </li>
+                    <li>
+                        <a href="#participated-formations" class="block p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600">My Participated Formations</a>
+                    </li>
+                    {% if user.user_role == 'manager' or user.user_role == 'department_chief' %}
+                        <li>
+                            <a href="#subordinate-employees" class="block p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600">Users Under Supervision</a>
+                        </li>
                     {% endif %}
-                </span>
-                <div class="notification-dropdown" id="notificationDropdown">
-                    {% for notification in notifications %}
-                        <div class="notification-item" data-notification-id="{{ notification.pk }}">
-                            <p>{{ notification.message }}</p>
-                            <span class="timestamp">{{ notification.created_at|date:"Y-m-d H:i" }}</span>
-                        </div>
-                    {% empty %}
-                        <div class="notification-item">
-                            <p>No new notifications.</p>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="user-icon-container">
-                <span class="user-icon" data-user-username="{{ user.user_username }}"
-                      data-user-email="{{ user.user_email }}"
-                      data-user-role="{{ user.user_role }}"
-                      data-user-nom="{{ user.user_lastname|default:'N/A' }}"
-                      data-user-prenom="{{ user.user_firstname|default:'N/A' }}"
-                      data-user-structure="{{ user.structure.structure_varchar|default:'N/A' }}"
-                      data-user-department="{{ user.department.department_name|default:'N/A' }}"
-                      data-user-state="{{ user.state|default:'N/A' }}">👤</span>
-            </div>
+                </ul>
+            </nav>
         </div>
 
-        <h2>Available Formations</h2>
-        {% if formations %}
-            <div class="search-filter-container">
-                <div class="search-container">
-                    <label for="formation-search-available">Search by Formation Title</label>
-                    <input type="text" id="formation-search-available" placeholder="Enter formation title...">
-                </div>
-                <div class="filter-container">
-                    <label for="formation-level-filter">Filter by Level</label>
-                    <select id="formation-level-filter">
-                        <option value="">All Levels</option>
-                        {% for formation in formations %}
-                            {% if formation.formation_niveau %}
-                                <option value="{{ formation.formation_niveau }}">{{ formation.formation_niveau }}</option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <div class="formation-grid">
-                {% for formation in formations %}
-                    <div class="formation-card" data-formation-id="{{ formation.formation_id }}"
-                         data-title="{{ formation.formation_titre }}"
-                         data-ref="{{ formation.formation_ref }}"
-                         data-level="{{ formation.formation_niveau }}"
-                         data-country="{{ formation.formation_pays }}"
-                         data-duration="{{ formation.formation_duree }}"
-                         data-cost="{{ formation.formation_cout }}"
-                         data-description="{{ formation.formation_description }}"
-                         data-prerequisites="{{ formation.formation_prerequis|default:'None' }}"
-                         data-program="{{ formation.formation_programme|default:'None' }}"
-                         data-target="{{ formation.formation_cible|default:'None' }}"
-                         data-objective="{{ formation.formation_objectif|default:'None' }}"
-                         data-is-participated="false">
-                        <h3>{{ formation.formation_titre }}</h3>
-                        <p><span class="label">Reference:</span> {{ formation.formation_ref }}</p>
-                        <p><span class="label">Level:</span> {{ formation.formation_niveau }}</p>
-                        <p><span class="label">Country:</span> {{ formation.formation_pays }}</p>
-                        <p><span class="label">Duration:</span> {{ formation.formation_duree }} days</p>
-                        <p><span class="label">Cost:</span> {{ formation.formation_cout }} USD</p>
-                        <p><span class="label">Description:</span> {{ formation.formation_description|truncatewords:20 }}</p>
+        <!-- Main Content -->
+        <div class="flex-1 container">
+            <!-- Header -->
+            <div class="card mb-6 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <button class="md:hidden text-blue-600" id="openSidebar">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl font-bold text-blue-600">Training Management System</h1>
+                        <p class="text-gray-600">Welcome, {{ user.user_username }}! (Role: {{ user.user_role|capfirst }})</p>
                     </div>
-                {% endfor %}
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <span class="notification-bell text-2xl cursor-pointer text-blue-600 hover:text-blue-800">
+                            🔔
+                            {% if notifications.count > 0 %}
+                                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">{{ notifications.count }}</span>
+                            {% endif %}
+                        </span>
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            {% for notification in notifications %}
+                                <div class="notification-item p-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer" data-notification-id="{{ notification.pk }}">
+                                    <p class="text-sm text-gray-800">{{ notification.message }}</p>
+                                    <span class="text-xs text-gray-500">{{ notification.created_at|date:"Y-m-d H:i" }}</span>
+                                </div>
+                            {% empty %}
+                                <div class="notification-item p-4 text-sm text-gray-600">
+                                    <p>No new notifications.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <span class="user-icon text-2xl cursor-pointer text-blue-600 hover:text-blue-800"
+                          data-user-username="{{ user.user_username }}"
+                          data-user-email="{{ user.user_email }}"
+                          data-user-role="{{ user.user_role }}"
+                          data-user-nom="{{ user.user_lastname|default:'N/A' }}"
+                          data-user-prenom="{{ user.user_firstname|default:'N/A' }}"
+                          data-user-structure="{{ user.structure.structure_varchar|default:'N/A' }}"
+                          data-user-department="{{ user.department.department_name|default:'N/A' }}"
+                          data-user-state="{{ user.state|default:'N/A' }}">👤</span>
+                    <a href="{% url 'users:logout' %}" class="text-red-500 hover:underline">Logout</a>
+                </div>
             </div>
-        {% else %}
-            <p>No formations available.</p>
-        {% endif %}
 
-        <h2>My Participated Formations</h2>
-        {% if user_formations %}
-            <div class="search-container">
-                <label for="formation-search">Search by Formation Title</label>
-                <input type="text" id="formation-search" placeholder="Enter formation title...">
-            </div>
-            <table class="participated-table">
-                <thead>
-                    <tr>
-                        <th>Formation Title</th>
-                        <th class="sortable" data-sort="state" data-direction="none"><span class="sort-icon">State</span></th>
-                        <th class="sortable" data-sort="date" data-direction="none"><span class="sort-icon">Date</span></th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user_formation in user_formations %}
-                        <tr>
-                            <td>{{ user_formation.formation.formation_titre }}</td>
-                            <td class="state-{{ user_formation.state_formation }}">{{ user_formation.state_formation|capfirst }}</td>
-                            <td>{{ user_formation.updated_at|date:"Y-m-d" }}</td>
-                            <td>
-                                <a href="#" class="view-details-btn" data-formation-id="{{ user_formation.formation.formation_id }}"
-                                   data-title="{{ user_formation.formation.formation_titre }}"
-                                   data-ref="{{ user_formation.formation.formation_ref }}"
-                                   data-level="{{ user_formation.formation.formation_niveau }}"
-                                   data-country="{{ user_formation.formation.formation_pays }}"
-                                   data-duration="{{ user_formation.formation.formation_duree }}"
-                                   data-cost="{{ user_formation.formation.formation_cout }}"
-                                   data-description="{{ user_formation.formation.formation_description }}"
-                                   data-prerequisites="{{ user_formation.formation.formation_prerequis|default:'None' }}"
-                                   data-program="{{ user_formation.formation.formation_programme|default:'None' }}"
-                                   data-target="{{ user_formation.formation.formation_cible|default:'None' }}"
-                                   data-objective="{{ user_formation.formation.formation_objectif|default:'None' }}"
-                                   data-is-participated="true">View Details</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>You have not participated in any formations.</p>
-        {% endif %}
-
-        {% if user.user_role == 'manager' or user.user_role == 'department_chief' %}
-        <h2>Users Under My Supervision</h2>
-        {% if subordinate_employees %}
-            <div class="search-container">
-                <label for="employee-search">Search by Username</label>
-                <input type="text" id="employee-search" placeholder="Enter username...">
-            </div>
-            <table class="employees-table">
-                <thead>
-                    <tr>
-                        <th class="sortable" data-sort="username" data-direction="none"><span class="sort-icon">Username</span></th>
-                        <th class="sortable" data-sort="email" data-direction="none"><span class="sort-icon">Email</span></th>
-                        <th class="sortable" data-sort="role" data-direction="none"><span class="sort-icon">Role</span></th>
-                        <th class="sortable" data-sort="department" data-direction="none"><span class="sort-icon">Department</span></th>
-                        <th class="sortable" data-sort="structure" data-direction="none"><span class="sort-icon">Structure</span></th>
-                        <th>Formations</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for employee in subordinate_employees %}
-                        <tr>
-                            <td>{{ employee.user_username }}</td>
-                            <td>{{ employee.user_email }}</td>
-                            <td>{{ employee.user_role|capfirst }}</td>
-                            <td>{{ employee.department.department_name|default:'N/A' }}</td>
-                            <td>{{ employee.structure.structure_varchar|default:'N/A' }}</td>
-                            <td>
-                                {% with employee_formations=employee.user_formations.all %}
-                                    {% if employee_formations %}
-                                        <ul style="margin: 0; padding-left: 20px;">
-                                            {% for uf in employee_formations %}
-                                                <li>{{ uf.formation.formation_titre }} ({{ uf.state_formation|capfirst }})</li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% else %}
-                                        None
+            <!-- Available Formations -->
+            <div id="available-formations" class="card mb-6">
+                <h2 class="text-xl font-semibold text-blue-600 mb-4">Available Formations</h2>
+                {% if formations %}
+                    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                        <div class="flex-1">
+                            <label for="formation-search-available" class="block text-sm font-medium text-gray-700 mb-1">Search by Title</label>
+                            <input type="text" id="formation-search-available" class="w-full max-w-xs border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" placeholder="Enter formation title...">
+                        </div>
+                        <div class="flex-1">
+                            <label for="formation-level-filter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Level</label>
+                            <select id="formation-level-filter" class="w-full max-w-xs border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Levels</option>
+                                {% for formation in formations %}
+                                    {% if formation.formation_niveau %}
+                                        <option value="{{ formation.formation_niveau }}">{{ formation.formation_niveau }}</option>
                                     {% endif %}
-                                {% endwith %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No users under your supervision.</p>
-        {% endif %}
-        {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for formation in formations %}
+                            <div class="formation-card bg-gray-50 rounded-lg p-4 hover:shadow-md cursor-pointer transition-shadow"
+                                 data-formation-id="{{ formation.formation_id }}"
+                                 data-title="{{ formation.formation_titre }}"
+                                 data-ref="{{ formation.formation_ref }}"
+                                 data-level="{{ formation.formation_niveau }}"
+                                 data-country="{{ formation.formation_pays }}"
+                                 data-duration="{{ formation.formation_duree }}"
+                                 data-cost="{{ formation.formation_cout }}"
+                                 data-description="{{ formation.formation_description }}"
+                                 data-prerequisites="{{ formation.formation_prerequis|default:'None' }}"
+                                 data-program="{{ formation.formation_programme|default:'None' }}"
+                                 data-target="{{ formation.formation_cible|default:'None' }}"
+                                 data-objective="{{ formation.formation_objectif|default:'None' }}"
+                                 data-is-participated="false">
+                                <h3 class="text-lg font-semibold text-blue-600">{{ formation.formation_titre }}</h3>
+                                <p class="text-sm"><span class="font-medium">Reference:</span> {{ formation.formation_ref }}</p>
+                                <p class="text-sm"><span class="font-medium">Level:</span> {{ formation.formation_niveau }}</p>
+                                <p class="text-sm"><span class="font-medium">Country:</span> {{ formation.formation_pays }}</p>
+                                <p class="text-sm"><span class="font-medium">Duration:</span> {{ formation.formation_duree }} days</p>
+                                <p class="text-sm"><span class="font-medium">Cost:</span> ${{ formation.formation_cout }}</p>
+                                <p class="text-sm"><span class="font-medium">Description:</span> {{ formation.formation_description|truncatewords:20 }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-600">No formations available.</p>
+                {% endif %}
+            </div>
 
-        <div id="formationModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modal-title"></h3>
-                    <span class="close">×</span>
+            <!-- Participated Formations -->
+            <div id="participated-formations" class="card mb-6">
+                <h2 class="text-xl font-semibold text-blue-600 mb-4">My Participated Formations</h2>
+                {% if user_formations %}
+                    <div class="mb-4">
+                        <label for="formation-search" class="block text-sm font-medium text-gray-700 mb-1">Search by Title</label>
+                        <input type="text" id="formation-search" class="w-full max-w-xs border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" placeholder="Enter formation title...">
+                    </div>
+                    <table class="w-full border-collapse participated-table">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="p-3 text-left text-sm font-medium text-blue-600">Formation Title</th>
+                                <th class="p-3 text-left text-sm font-medium text-blue-600 sortable" data-sort="state" data-direction="none">State</th>
+                                <th class="p-3 text-left text-sm font-medium text-blue-600 sortable" data-sort="date" data-direction="none">Date</th>
+                                <th class="p-3 text-left text-sm font-medium text-blue-600">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user_formation in user_formations %}
+                                <tr class="border-b">
+                                    <td class="p-3 text-sm">{{ user_formation.formation.formation_titre }}</td>
+                                    <td class="p-3 text-sm capitalize {% if user_formation.state_formation == 'pending' %}text-yellow-500{% elif user_formation.state_formation == 'validated' %}text-green-500{% else %}text-red-500{% endif %}">
+                                        {{ user_formation.state_formation }}
+                                    </td>
+                                    <td class="p-3 text-sm">{{ user_formation.updated_at|date:"Y-m-d" }}</td>
+                                    <td class="p-3">
+                                        <a href="#" class="view-details-btn bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm"
+                                           data-formation-id="{{ user_formation.formation.formation_id }}"
+                                           data-title="{{ user_formation.formation.formation_titre }}"
+                                           data-ref="{{ user_formation.formation.formation_ref }}"
+                                           data-level="{{ user_formation.formation.formation_niveau }}"
+                                           data-country="{{ user_formation.formation.formation_pays }}"
+                                           data-duration="{{ user_formation.formation.formation_duree }}"
+                                           data-cost="{{ user_formation.formation.formation_cout }}"
+                                           data-description="{{ user_formation.formation.formation_description }}"
+                                           data-prerequisites="{{ user_formation.formation.formation_prerequis|default:'None' }}"
+                                           data-program="{{ user_formation.formation.formation_programme|default:'None' }}"
+                                           data-target="{{ user_formation.formation.formation_cible|default:'None' }}"
+                                           data-objective="{{ user_formation.formation.formation_objectif|default:'None' }}"
+                                           data-is-participated="true">View Details</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-gray-600">You have not participated in any formations.</p>
+                {% endif %}
+            </div>
+
+            <!-- Users Under My Supervision -->
+            {% if user.user_role == 'manager' or user.user_role == 'department_chief' %}
+                <div id="subordinate-employees" class="card mb-6">
+                    <h2 class="text-xl font-semibold text-blue-600 mb-4">Users Under My Supervision</h2>
+                    {% if subordinate_employees %}
+                        <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                            <div class="flex-1">
+                                <label for="employee-search" class="block text-sm font-medium text-gray-700 mb-1">Search by Username</label>
+                                <input type="text" id="employee-search" class="w-full max-w-xs border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" placeholder="Enter username...">
+                            </div>
+                            <div class="flex-1">
+                                <label for="employee-formation-search" class="block text-sm font-medium text-gray-700 mb-1">Search by Formation</label>
+                                <input type="text" id="employee-formation-search" class="w-full max-w-xs border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" placeholder="Enter formation title...">
+                            </div>
+                        </div>
+                        <table class="w-full border-collapse employees-table">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="p-3 text-left text-sm font-medium text-blue-600 sortable" data-sort="username" data-direction="none">Username</th>
+                                    <th class="p-3 text-left text-sm font-medium text-blue-600 sortable" data-sort="email" data-direction="none">Email</th>
+                                    <th class="p-3 text-left text-sm font-medium text-blue-600 sortable" data-sort="role" data-direction="none">Role</th>
+                                    <th class="p-3 text-left text-sm font-medium text-blue-600 sortable" data-sort="department" data-direction="none">Department</th>
+                                    <th ricchi  class="p-3 text-left text-sm font-medium text-blue-600 sortable" data-sort="structure" data-direction="none">Structure</th>
+                                    <th class="p-3 text-left text-sm font-medium text-blue-600">Formations</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for employee in subordinate_employees %}
+                                    <tr class="border-b">
+                                        <td class="p-3 text-sm">{{ employee.user_username }}</td>
+                                        <td class="p-3 text-sm">{{ employee.user_email }}</td>
+                                        <td class="p-3 text-sm capitalize">{{ employee.user_role }}</td>
+                                        <td class="p-3 text-sm">{{ employee.department.department_name|default:'N/A' }}</td>
+                                        <td class="p-3 text-sm">{{ employee.structure.structure_varchar|default:'N/A' }}</td>
+                                        <td class="p-3 text-sm">
+                                            {% with employee_formations=employee.user_formations.all %}
+                                                {% if employee_formations %}
+                                                    <ul class="list-disc pl-5">
+                                                        {% for uf in employee_formations %}
+                                                            <li data-formation-title="{{ uf.formation.formation_titre }}">{{ uf.formation.formation_titre }} ({{ uf.state_formation|capfirst }})</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% else %}
+                                                    None
+                                                {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-gray-600">No users under your supervision.</p>
+                    {% endif %}
                 </div>
-                <div class="modal-body">
-                    <p><span class="label">Reference:</span> <span id="modal-ref"></span></p>
-                    <p><span class="label">Level:</span> <span id="modal-level"></span></p>
-                    <p><span class="label">Country:</span> <span id="modal-country"></span></p>
-                    <p><span class="label">Duration:</span> <span id="modal-duration"></span> days</p>
-                    <p><span class="label">Cost:</span> <span id="modal-cost"></span> USD</p>
-                    <p><span class="label">Description:</span> <span id="modal-description"></span></p>
-                    <p><span class="label">Prerequisites:</span> <span id="modal-prerequisites"></span></p>
-                    <p><span class="label">Program:</span> <span id="modal-program"></span></p>
-                    <p><span class="label">Target:</span> <span id="modal-target"></span></p>
-                    <p><span class="label">Objective:</span> <span id="modal-objective"></span></p>
-                </div>
-                <div class="modal-footer">
-                    <button class="participate-btn" id="participateBtn">Participate</button>
-                    <div id="modal-message" class="message"></div>
+            {% endif %}
+
+            <!-- Modals -->
+            <div id="formationModal" class="modal">
+                <div class="modal-content">
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6 rounded-t-lg flex justify-between items-center">
+                        <h3 id="modal-title" class="text-lg font-semibold"></h3>
+                        <span class="close text-2xl cursor-pointer hover:text-gray-200">×</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p><span class="font-medium text-blue-600">Reference:</span> <span id="modal-ref"></span></p>
+                        <p><span class="font-medium text-blue-600">Level:</span> <span id="modal-level"></span></p>
+                        <p><span class="font-medium text-blue-600">Country:</span> <span id="modal-country"></span></p>
+                        <p><span class="font-medium text-blue-600">Duration:</span> <span id="modal-duration"></span> days</p>
+                        <p><span class="font-medium text-blue-600">Cost:</span> <span id="modal-cost"></span> USD</p>
+                        <p><span class="font-medium text-blue-600">Description:</span> <span id="modal-description"></span></p>
+                        <p><span class="font-medium text-blue-600">Prerequisites:</span> <span id="modal-prerequisites"></span></p>
+                        <p><span class="font-medium text-blue-600">Program:</span> <span id="modal-program"></span></p>
+                        <p><span class="font-medium text-blue-600">Target:</span> <span id="modal-target"></span></p>
+                        <p><span class="font-medium text-blue-600">Objective:</span> <span id="modal-objective"></span></p>
+                    </div>
+                    <div class="p-6 border-t border-gray-200 flex flex-col items-center gap-2">
+                        <button id="participateBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed">Participate</button>
+                        <div id="modal-message" class="text-sm"></div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div id="userModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>User Profile</h3>
-                    <span class="close">×</span>
+            <div id="userModal" class="modal">
+                <div class="modal-content">
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6 rounded-t-lg flex justify-between items-center">
+                        <h3 class="text-lg font-semibold">User Profile</h3>
+                        <span class="close text-2xl cursor-pointer hover:text-gray-200">×</span>
+                    </div>
+                    <div class="p-6 space-y-4" id="userModalBody"></div>
                 </div>
-                <div class="modal-body" id="userModalBody"></div>
             </div>
-        </div>
-
-        <div class="logout">
-            <a href="{% url 'users:logout' %}">Logout</a>
         </div>
     </div>
 
     <script>
         // Helper function to get CSRF token
         function getCsrfToken() {
-            const token = document.querySelector('meta[name="csrf-token"]')?.content ||
-                          '{{ csrf_token }}';
-            return token;
+            return document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token }}';
         }
 
         // DOM elements
@@ -615,13 +390,26 @@
         const searchInputAvailable = document.getElementById('formation-search-available');
         const levelFilter = document.getElementById('formation-level-filter');
         const searchInputEmployees = document.getElementById('employee-search');
+        const searchInputEmployeeFormations = document.getElementById('employee-formation-search');
+        const sidebar = document.getElementById('sidebar');
+        const openSidebarBtn = document.getElementById('openSidebar');
+        const toggleSidebarBtn = document.getElementById('toggleSidebar');
 
         let currentFormationId = null;
 
+        // Sidebar toggle
+        openSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.add('open');
+        });
+
+        toggleSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+        });
+
         // Close modal function
         function closeModals() {
-            if (formationModal) formationModal.style.display = 'none';
-            if (userModal) userModal.style.display = 'none';
+            formationModal.classList.remove('show');
+            userModal.classList.remove('show');
         }
 
         // Notification dropdown toggle
@@ -636,9 +424,7 @@
 
         // Close notification dropdown when clicking outside
         document.addEventListener('click', (event) => {
-            if (notificationBell && notificationDropdown &&
-                !notificationBell.contains(event.target) &&
-                !notificationDropdown.contains(event.target)) {
+            if (!notificationBell.contains(event.target) && !notificationDropdown.contains(event.target)) {
                 notificationDropdown.classList.remove('show');
             }
         });
@@ -659,20 +445,18 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.status === 'success') {
-                            item.classList.add('read');
+                            item.classList.add('bg-gray-100');
                             const remainingItems = notificationDropdown.querySelectorAll('.notification-item[data-notification-id]');
                             if (remainingItems.length === 0) {
                                 notificationDropdown.innerHTML = `
-                                    <div class="notification-item">
+                                    <div class="notification-item p-4 text-sm text-gray-600">
                                         <p>No new notifications.</p>
                                     </div>
                                 `;
                             }
-                        } else {
-                            console.error('Failed to mark notification as read:', data.message);
                         }
                     })
-                    .catch(error => console.error('Error marking notification as read:', error));
+                    .catch(error => console.error('Error:', error));
                 }
             });
         });
@@ -689,14 +473,14 @@
             });
         }
 
-        // Update formation grid based on search and filter
+        // Update formation grid
         function updateFormationGrid() {
-            const searchQuery = searchInputAvailable ? searchInputAvailable.value.toLowerCase() : '';
-            const selectedLevel = levelFilter ? levelFilter.value : '';
+            const searchQuery = searchInputAvailable.value.toLowerCase();
+            const selectedLevel = levelFilter.value;
             const cards = document.querySelectorAll('.formation-card');
             cards.forEach(card => {
-                const title = card.getAttribute('data-title')?.toLowerCase() || '';
-                const level = card.getAttribute('data-level') || '';
+                const title = card.getAttribute('data-title').toLowerCase();
+                const level = card.getAttribute('data-level');
                 const matchesSearch = title.includes(searchQuery);
                 const matchesFilter = selectedLevel === '' || level === selectedLevel;
                 card.style.display = matchesSearch && matchesFilter ? '' : 'none';
@@ -709,7 +493,6 @@
 
         if (levelFilter) {
             levelFilter.addEventListener('change', updateFormationGrid);
-            // Remove duplicate options
             const options = Array.from(levelFilter.options);
             const uniqueValues = new Set();
             options.forEach(opt => {
@@ -721,19 +504,32 @@
             });
         }
 
-        // Search for employees
-        if (searchInputEmployees) {
-            searchInputEmployees.addEventListener('input', () => {
-                const query = searchInputEmployees.value.toLowerCase();
-                const rows = document.querySelectorAll('.employees-table tbody tr');
-                rows.forEach(row => {
-                    const username = row.querySelector('td:first-child').textContent.toLowerCase();
-                    row.style.display = username.includes(query) ? '' : 'none';
-                });
+        // Search for employees (by username and formation)
+        function updateEmployeeTable() {
+            const usernameQuery = searchInputEmployees?.value.toLowerCase() || '';
+            const formationQuery = searchInputEmployeeFormations?.value.toLowerCase() || '';
+            const rows = document.querySelectorAll('.employees-table tbody tr');
+            rows.forEach(row => {
+                const username = row.querySelector('td:first-child').textContent.toLowerCase();
+                const formationCells = row.querySelector('td:last-child').querySelectorAll('li[data-formation-title]');
+                const formationsText = Array.from(formationCells)
+                    .map(cell => cell.getAttribute('data-formation-title').toLowerCase())
+                    .join(' ');
+                const matchesUsername = username.includes(usernameQuery);
+                const matchesFormation = formationQuery === '' || formationsText.includes(formationQuery);
+                row.style.display = matchesUsername && matchesFormation ? '' : 'none';
             });
         }
 
-        // Table sorting function
+        if (searchInputEmployees) {
+            searchInputEmployees.addEventListener('input', updateEmployeeTable);
+        }
+
+        if (searchInputEmployeeFormations) {
+            searchInputEmployeeFormations.addEventListener('input', updateEmployeeTable);
+        }
+
+        // Table sorting
         function sortTable(tableSelector, sortKey, direction) {
             const tbody = document.querySelector(`${tableSelector} tbody`);
             const rows = Array.from(tbody.querySelectorAll('tr'));
@@ -774,11 +570,10 @@
             rows.forEach(row => tbody.appendChild(row));
         }
 
-        // Attach sorting event listeners
-        document.querySelectorAll('.participated-table th.sortable, .employees-table th.sortable').forEach(header => {
+        // Sorting event listeners
+        document.querySelectorAll('.sortable').forEach(header => {
             header.addEventListener('click', () => {
-                const tableSelector = header.closest('table').classList.contains('participated-table') ?
-                                     '.participated-table' : '.employees-table';
+                const tableSelector = header.closest('table').classList.contains('participated-table') ? '.participated-table' : '.employees-table';
                 const sortKey = header.getAttribute('data-sort');
                 const currentDirection = header.getAttribute('data-direction');
                 const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
@@ -792,21 +587,15 @@
                     }
                 });
                 sortTable(tableSelector, sortKey, newDirection);
-                // Reapply search filter after sorting
-                if (tableSelector === '.participated-table' && searchInputParticipated && searchInputParticipated.value) {
+                if (tableSelector === '.participated-table' && searchInputParticipated?.value) {
                     const query = searchInputParticipated.value.toLowerCase();
                     const rows = document.querySelectorAll('.participated-table tbody tr');
                     rows.forEach(row => {
                         const title = row.querySelector('td:first-child').textContent.toLowerCase();
                         row.style.display = title.includes(query) ? '' : 'none';
                     });
-                } else if (tableSelector === '.employees-table' && searchInputEmployees && searchInputEmployees.value) {
-                    const query = searchInputEmployees.value.toLowerCase();
-                    const rows = document.querySelectorAll('.employees-table tbody tr');
-                    rows.forEach(row => {
-                        const username = row.querySelector('td:first-child').textContent.toLowerCase();
-                        row.style.display = username.includes(query) ? '' : 'none';
-                    });
+                } else if (tableSelector === '.employees-table') {
+                    updateEmployeeTable();
                 }
             });
         });
@@ -826,19 +615,11 @@
             modalTarget.textContent = element.getAttribute('data-target') || 'None';
             modalObjective.textContent = element.getAttribute('data-objective') || 'None';
             const isParticipated = element.getAttribute('data-is-participated') === 'true';
-            if (participateBtn) {
-                participateBtn.disabled = isParticipated;
-            }
-            if (modalMessage) {
-                modalMessage.textContent = isParticipated ? 'You are already enrolled in this formation.' : '';
-                modalMessage.className = isParticipated ? 'message' : 'message';
-            }
-            if (formationModal) {
-                formationModal.style.display = 'flex';
-            }
-            if (userModal) {
-                userModal.style.display = 'none';
-            }
+            participateBtn.disabled = isParticipated;
+            modalMessage.textContent = isParticipated ? 'You are already enrolled in this formation.' : '';
+            modalMessage.className = isParticipated ? 'text-green-500' : '';
+            formationModal.classList.add('show');
+            userModal.classList.remove('show');
         }
 
         // Open user modal
@@ -854,86 +635,69 @@
                 'State': element.getAttribute('data-user-state') || 'N/A'
             };
             const modalBody = document.getElementById('userModalBody');
-            if (modalBody) {
-                modalBody.innerHTML = '';
-                for (const [key, value] of Object.entries(userData)) {
-                    if (value && value !== 'N/A') {
-                        const p = document.createElement('p');
-                        p.innerHTML = `<span class="label">${key}:</span> ${value}`;
-                        modalBody.appendChild(p);
-                    }
+            modalBody.innerHTML = '';
+            for (const [key, value] of Object.entries(userData)) {
+                if (value && value !== 'N/A') {
+                    const p = document.createElement('p');
+                    p.innerHTML = `<span class="font-medium text-blue-600">${key}:</span> ${value}`;
+                    modalBody.appendChild(p);
                 }
             }
-            if (userModal) {
-                userModal.style.display = 'flex';
-            }
-            if (formationModal) {
-                formationModal.style.display = 'none';
-            }
+            userModal.classList.add('show');
+            formationModal.classList.remove('show');
         }
 
-        // Attach event listeners
-        if (userIcon) {
-            userIcon.addEventListener('click', () => openUserModal(userIcon));
-        }
-
+        // Event listeners
+        userIcon.addEventListener('click', () => openUserModal(userIcon));
         document.querySelectorAll('.formation-card').forEach(card => {
             card.addEventListener('click', () => openFormationModal(card));
         });
-
         document.querySelectorAll('.view-details-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 openFormationModal(btn);
             });
         });
-
         Array.from(closeButtons).forEach(btn => {
             btn.addEventListener('click', closeModals);
         });
-
         window.addEventListener('click', (event) => {
             if (event.target === formationModal || event.target === userModal) {
                 closeModals();
             }
         });
 
-        // Participate button handler
-        if (participateBtn) {
-            participateBtn.addEventListener('click', () => {
-                if (!currentFormationId) {
-                    modalMessage.textContent = 'No formation selected.';
-                    modalMessage.className = 'message error';
-                    return;
+        // Participate button
+        participateBtn.addEventListener('click', () => {
+            if (!currentFormationId) {
+                modalMessage.textContent = 'No formation selected.';
+                modalMessage.className = 'text-red-500';
+                return;
+            }
+            fetch("{% url 'users:participate_formation' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({ formation_id: currentFormationId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                modalMessage.textContent = data.message;
+                modalMessage.className = `text-${data.status === 'success' ? 'green' : 'red'}-500`;
+                if (data.status === 'success') {
+                    participateBtn.disabled = true;
+                    const card = document.querySelector(`.formation-card[data-formation-id="${currentFormationId}"]`);
+                    if (card) card.setAttribute('data-is-participated', 'true');
                 }
-                fetch("{% url 'users:participate_formation' %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCsrfToken()
-                    },
-                    body: JSON.stringify({ formation_id: currentFormationId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    modalMessage.textContent = data.message;
-                    modalMessage.className = `message ${data.status}`;
-                    if (data.status === 'success') {
-                        participateBtn.disabled = true;
-                        // Update the formation card to reflect participation
-                        const card = document.querySelector(`.formation-card[data-formation-id="${currentFormationId}"]`);
-                        if (card) {
-                            card.setAttribute('data-is-participated', 'true');
-                        }
-                    }
-                })
-                .catch(error => {
-                    modalMessage.textContent = 'An error occurred. Please try again.';
-                    modalMessage.className = 'message error';
-                    console.error('Error participating in formation:', error);
-                });
+            })
+            .catch(error => {
+                modalMessage.textContent = 'An error occurred.';
+                modalMessage.className = 'text-red-500';
+                console.error('Error:', error);
             });
-        }
+        });
     </script>
 </body>
 </html>

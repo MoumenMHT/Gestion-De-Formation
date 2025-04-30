@@ -8,5 +8,6 @@ urlpatterns = [
     path('users/', include('users.urls', namespace='users')),
     path('', user_login, name='login'),  # Explicit login URL
     path('logout/', user_logout, name='logout'),
+    path('admin/logout//', user_logout, name='logout'),
 
 ]
