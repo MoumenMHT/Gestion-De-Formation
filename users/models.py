@@ -1,7 +1,7 @@
-# users/models.py
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
+from django_currentuser.middleware import get_current_authenticated_user
 
 class UserManager(BaseUserManager):
     def _create_user(self, user_email, user_username, password=None, **extra_fields):
@@ -43,6 +43,14 @@ class Structure(models.Model):
     structure_miseajour_date = models.DateTimeField(auto_now=True)
     structure_niveau = models.CharField(max_length=50)
 
+    def save(self, *args, **kwargs):
+        user = get_current_authenticated_user()
+        if user:
+            if not self.pk:  # New instance
+                self.structure_cree_par = user.user_username
+            self.structure_miseajour_par = user.user_username
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.structure_varchar
 
@@ -55,6 +63,14 @@ class Department(models.Model):
     department_cree_date = models.DateTimeField(default=timezone.now)
     department_miseajour_par = models.CharField(max_length=50, blank=True, null=True)
     department_miseajour_date = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        user = get_current_authenticated_user()
+        if user:
+            if not self.pk:  # New instance
+                self.department_cree_par = user.user_username
+            self.department_miseajour_par = user.user_username
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.department_name} ({self.structure.structure_varchar})"
@@ -95,6 +111,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'user_email'
     REQUIRED_FIELDS = ['user_username', 'user_firstname', 'user_lastname', 'user_role']
 
+    def save(self, *args, **kwargs):
+        user = get_current_authenticated_user()
+        if user:
+            if not self.pk:  # New instance
+                self.user_cree_par = user.user_username
+            self.user_miseajour_par = user.user_username
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.user_username
 
@@ -116,6 +140,13 @@ class Formation(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='formations', null=True)
     structure = models.ForeignKey(Structure, on_delete=models.CASCADE, related_name='formations')
 
+    def save(self, *args, **kwargs):
+        user = get_current_authenticated_user()
+        if user:
+            if not self.pk:  # New instance
+                self.formation_mise_a_jour_cree = user.user_username
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.formation_titre
 
@@ -127,6 +158,13 @@ class UserFormation(models.Model):
     valide_date = models.DateTimeField(blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_formations')
     formation = models.ForeignKey(Formation, on_delete=models.CASCADE, related_name='user_formations')
+
+    def save(self, *args, **kwargs):
+        user = get_current_authenticated_user()
+        if user:
+            if not self.pk:  # New instance
+                self.valide_par = user.user_username
+        super().save(*args, **kwargs)
 
     def valider_par(self, validator):
         self.valide_par = validator
@@ -155,6 +193,13 @@ class Notification(models.Model):
     message = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
     is_read = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        user = get_current_authenticated_user()
+        if user:
+            if not self.pk:  # New instance
+                self.created_at = timezone.now()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Notification for {self.user.user_username}: {self.message[:50]}"

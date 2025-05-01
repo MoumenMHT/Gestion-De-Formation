@@ -20,7 +20,7 @@ def user_login(request):
             else:
                 login(request, user)
                 if user.user_role == 'DRH':
-                    return redirect('admin:index')
+                    return redirect('admin/users/accountsdemanded/')
                 else:
                     messages.success(request, f"Welcome, {user.user_username}!")
                     return redirect('users:user_list')
