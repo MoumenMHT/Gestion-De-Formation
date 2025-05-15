@@ -91,6 +91,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ('manager', 'Manager'),
         ('department_chief', 'Department Chief'),
         ('DRH', 'DRH'),
+        ('admin', 'Admin'),
     ])
     structure = models.ForeignKey(Structure, on_delete=models.SET_NULL, related_name='users', null=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, related_name='users', null=True, blank=True)

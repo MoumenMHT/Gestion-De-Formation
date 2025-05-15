@@ -19,7 +19,9 @@ def user_login(request):
                 messages.error(request, "Your account is not yet approved. Please wait for admin approval.")
             else:
                 login(request, user)
-                if user.user_role == 'DRH':
+
+
+                if user.user_role == 'DRH' or user.user_role == 'admin':
                     return redirect('admin/users/accountsdemanded/')
                 else:
                     messages.success(request, f"Welcome, {user.user_username}!")
@@ -139,7 +141,7 @@ class UserListView(ListView):
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('login')
-        if request.user.user_role == 'DRH':
+        if request.user.user_role == 'DRH' or request.user.user_role == 'admin':
             return redirect('admin:index')
         return super().get(request, *args, **kwargs)
 
@@ -151,7 +153,7 @@ class UserDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('login')
-        if request.user.user_role == 'DRH':
+        if request.user.user_role == 'DRH' or request.user.user_role == 'admin':
             return redirect('admin:index')
         return super().get(request, *args, **kwargs)
 
@@ -164,7 +166,7 @@ class UserCreateView(CreateView):
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('login')
-        if request.user.user_role == 'DRH':
+        if request.user.user_role == 'DRH' or request.user.user_role == 'admin':
             return redirect('admin:index')
         return super().get(request, *args, **kwargs)
 
@@ -177,7 +179,7 @@ class UserUpdateView(UpdateView):
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('login')
-        if request.user.user_role == 'DRH':
+        if request.user.user_role == 'DRH' or request.user.user_role == 'admin':
             return redirect('admin:index')
         return super().get(request, *args, **kwargs)
 
@@ -189,6 +191,6 @@ class UserDeleteView(DeleteView):
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('login')
-        if request.user.user_role == 'DRH':
+        if request.user.user_role == 'DRH' or request.user.user_role == 'admin':
             return redirect('admin:index')
         return super().get(request, *args, **kwargs)

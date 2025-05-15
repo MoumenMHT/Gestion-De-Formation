@@ -32,6 +32,10 @@ class UserAdmin(admin.ModelAdmin):
         ('Audit Info', {'fields': ('user_cree_par', 'user_cree_date', 'user_miseajour_par', 'user_miseajour_date')}),
     )
 
+    def has_module_permission(self, request):
+        # Only superusers who are not DRH can access the User section
+        return request.user.is_superuser and request.user.user_role != 'DRH'
+
     def validate_users(self, request, queryset):
         updated = queryset.filter(state='pending').update(state='approved', is_active=True)
         for user in queryset.filter(state='pending'):
@@ -60,7 +64,14 @@ class AccountsDemandedAdmin(admin.ModelAdmin):
     readonly_fields = ('user_email', 'user_username', 'user_firstname', 'user_lastname', 'user_role', 'structure', 'department', 'user_cree_par', 'user_cree_date', 'user_miseajour_par', 'user_miseajour_date')
 
     def get_queryset(self, request):
-        return User.objects.filter(state='pending')
+        qs = User.objects.filter(state='pending')
+        if request.user.is_superuser and request.user.user_role != 'DRH':
+            # Admins (non-DRH superusers) can see all pending accounts
+            return qs
+        elif request.user.user_role == 'DRH' and request.user.structure:
+            # DRH users can only see pending accounts from their structure
+            return qs.filter(structure=request.user.structure)
+        return qs.none()  # Return empty queryset if user has no structure or invalid role
 
     def validate_button(self, obj):
         return format_html(
@@ -87,12 +98,13 @@ class AccountsDemandedAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
     def validate_user(self, request, pk):
-        if not request.user.is_superuser:
-            self.message_user(request, "You do not have permission to perform this action.", level=messages.ERROR)
-            print(f"Permission denied for user: {request.user.username}")
-            return redirect('admin:users_accountsdemanded_changelist')
         try:
             user = User.objects.get(pk=pk, state='pending')
+            # Check if DRH is trying to validate a user outside their structure
+            if request.user.user_role == 'DRH' and user.structure != request.user.structure:
+                self.message_user(request, "You can only validate users from your structure.", level=messages.ERROR)
+                print(f"Permission denied for DRH {request.user.username}: User {user.user_username} not in structure")
+                return redirect('admin:users_accountsdemanded_changelist')
             print(f"Validating user: {user.user_username} (ID: {pk})")
             user.state = 'approved'
             user.is_active = True
@@ -113,12 +125,13 @@ class AccountsDemandedAdmin(admin.ModelAdmin):
         return redirect('admin:users_accountsdemanded_changelist')
 
     def refuse_user(self, request, pk):
-        if not request.user.is_superuser:
-            self.message_user(request, "You do not have permission to perform this action.", level=messages.ERROR)
-            print(f"Permission denied for user: {request.user.username}")
-            return redirect('admin:users_accountsdemanded_changelist')
         try:
             user = User.objects.get(pk=pk, state='pending')
+            # Check if DRH is trying to refuse a user outside their structure
+            if request.user.user_role == 'DRH' and user.structure != request.user.structure:
+                self.message_user(request, "You can only refuse users from your structure.", level=messages.ERROR)
+                print(f"Permission denied for DRH {request.user.username}: User {user.user_username} not in structure")
+                return redirect('admin:users_accountsdemanded_changelist')
             print(f"Refusing user: {user.user_username} (ID: {pk})")
             user.state = 'rejected'
             user.is_active = False
@@ -135,7 +148,7 @@ class AccountsDemandedAdmin(admin.ModelAdmin):
         return redirect('admin:users_accountsdemanded_changelist')
 
     def has_change_permission(self, request, obj=None):
-        return request.user.is_superuser
+        return request.user.is_superuser or request.user.user_role == 'DRH'
 
 class StructureAdmin(admin.ModelAdmin):
     list_display = ('structure_varchar', 'structure_code', 'structure_niveau', 'structure_cree_date')
@@ -149,6 +162,10 @@ class StructureAdmin(admin.ModelAdmin):
         ('Audit Info', {'fields': ('structure_cree_par', 'structure_cree_date', 'structure_miseajour_par', 'structure_miseajour_date')}),
     )
 
+    def has_module_permission(self, request):
+        # Only superusers who are not DRH can access the User section
+        return request.user.is_superuser and request.user.user_role != 'DRH'
+
 class DepartmentAdmin(admin.ModelAdmin):
     list_display = ('department_name', 'department_code', 'structure', 'department_cree_date')
     list_filter = ('structure',)
@@ -160,6 +177,10 @@ class DepartmentAdmin(admin.ModelAdmin):
         (None, {'fields': ('department_name', 'department_code', 'structure')}),
         ('Audit Info', {'fields': ('department_cree_par', 'department_cree_date', 'department_miseajour_par', 'department_miseajour_date')}),
     )
+
+    def has_module_permission(self, request):
+        # Only superusers who are not DRH can access the User section
+        return request.user.is_superuser and request.user.user_role != 'DRH'
 
 class FormationAdmin(admin.ModelAdmin):
     list_display = ('formation_titre', 'formation_ref', 'formation_niveau', 'formation_cout', 'formation_pays', 'structure')
@@ -249,7 +270,14 @@ class PendingUserFormationsAdmin(admin.ModelAdmin):
     readonly_fields = ('user', 'formation', 'date_inscription', 'valide_par', 'valide_date')
 
     def get_queryset(self, request):
-        return UserFormation.objects.filter(state_formation='pending')
+        qs = UserFormation.objects.filter(state_formation='pending')
+        if request.user.is_superuser and request.user.user_role != 'DRH':
+            # Admins (non-DRH superusers) can see all pending formation registrations
+            return qs
+        elif request.user.user_role == 'DRH' and request.user.structure:
+            # DRH users can only see pending formations from their structure
+            return qs.filter(formation__structure=request.user.structure)
+        return qs.none()  # Return empty queryset if user has no structure or invalid role
 
     def get_valide_date(self, obj):
         return obj.valide_date if obj.valide_date else '-'
@@ -280,12 +308,13 @@ class PendingUserFormationsAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
     def validate_user_formation(self, request, pk):
-        if not request.user.is_superuser:
-            self.message_user(request, "You do not have permission to perform this action.", level=messages.ERROR)
-            print(f"Permission denied for user: {request.user.username}")
-            return redirect('admin:users_pendinguserformations_changelist')
         try:
             user_formation = UserFormation.objects.get(pk=pk, state_formation='pending')
+            # Check if DRH is trying to validate a formation outside their structure
+            if request.user.user_role == 'DRH' and user_formation.formation.structure != request.user.structure:
+                self.message_user(request, "You can only validate formations from your structure.", level=messages.ERROR)
+                print(f"Permission denied for DRH {request.user.username}: Formation {user_formation.formation.formation_titre} not in structure")
+                return redirect('admin:users_pendinguserformations_changelist')
             print(f"Validating formation for user: {user_formation.user.user_username}, formation: {user_formation.formation.formation_titre} (ID: {pk})")
             user_formation.state_formation = 'approved'
             user_formation.valide_date = timezone.now()
@@ -302,12 +331,13 @@ class PendingUserFormationsAdmin(admin.ModelAdmin):
         return redirect('admin:users_pendinguserformations_changelist')
 
     def refuse_user_formation(self, request, pk):
-        if not request.user.is_superuser:
-            self.message_user(request, "You do not have permission to perform this action.", level=messages.ERROR)
-            print(f"Permission denied for user: {request.user.username}")
-            return redirect('admin:users_pendinguserformations_changelist')
         try:
             user_formation = UserFormation.objects.get(pk=pk, state_formation='pending')
+            # Check if DRH is trying to refuse a formation outside their structure
+            if request.user.user_role == 'DRH' and user_formation.formation.structure != request.user.structure:
+                self.message_user(request, "You can only refuse formations from your structure.", level=messages.ERROR)
+                print(f"Permission denied for DRH {request.user.username}: Formation {user_formation.formation.formation_titre} not in structure")
+                return redirect('admin:users_pendinguserformations_changelist')
             print(f"Refusing formation for user: {user_formation.user.user_username}, formation: {user_formation.formation.formation_titre} (ID: {pk})")
             user_formation.state_formation = 'rejected'
             user_formation.valide_par = request.user
@@ -325,7 +355,7 @@ class PendingUserFormationsAdmin(admin.ModelAdmin):
         return redirect('admin:users_pendinguserformations_changelist')
 
     def has_change_permission(self, request, obj=None):
-        return request.user.is_superuser
+        return request.user.is_superuser or request.user.user_role == 'DRH'
 
 # Register models
 admin.site.register(User, UserAdmin)
