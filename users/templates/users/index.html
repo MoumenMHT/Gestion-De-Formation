@@ -236,10 +236,10 @@
                             {% for user_formation in user_formations %}
                                 <tr class="border-b">
                                     <td class="p-3 text-sm">{{ user_formation.formation.formation_titre }}</td>
-                                    <td class="p-3 text-sm capitalize {% if user_formation.state_formation == 'pending' %}text-yellow-500{% elif user_formation.state_formation == 'validated' %}text-green-500{% else %}text-red-500{% endif %}">
+                                    <td class="p-3 text-sm capitalize {% if user_formation.state_formation == 'pending' %}text-yellow-500{% elif user_formation.state_formation == 'approved' %}text-green-500{% else %}text-red-500{% endif %}">
                                         {{ user_formation.state_formation }}
                                     </td>
-                                    <td class="p-3 text-sm">{{ user_formation.updated_at|date:"Y-m-d" }}</td>
+                                    <td class="p-3 text-sm">{{ user_formation.valide_date|date:"Y-m-d" }}</td>
                                     <td class="p-3">
                                         <a href="#" class="view-details-btn bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm"
                                            data-formation-id="{{ user_formation.formation.formation_id }}"
@@ -363,7 +363,7 @@
     <script>
         // Helper function to get CSRF token
         function getCsrfToken() {
-            return document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token }}';
+            return document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token }} ';
         }
 
         // DOM elements

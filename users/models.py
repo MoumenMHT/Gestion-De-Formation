@@ -188,6 +188,7 @@ class UserFormation(models.Model):
         return f"{self.user.user_username} - {self.formation.formation_titre}"
 
 class Notification(models.Model):
+    objects = None
     notification_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     message = models.TextField()

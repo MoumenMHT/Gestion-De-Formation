@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 from django.utils import timezone
+from django import forms
 from .models import User, Structure, Department, Formation, UserFormation, Notification
 
 # Customize Admin Site
@@ -95,6 +96,10 @@ class AccountsDemandedAdmin(admin.ModelAdmin):
             print(f"Validating user: {user.user_username} (ID: {pk})")
             user.state = 'approved'
             user.is_active = True
+            if user.user_role == 'DRH':
+                user.is_superuser = True
+                user.is_staff = True
+                print(f"User {user.user_username} set as superuser (role: drh)")
             user.save()
             Notification.objects.create(
                 user=user,
@@ -169,7 +174,20 @@ class FormationAdmin(admin.ModelAdmin):
         ('Audit Info', {'fields': ('formation_mise_a_jour_cree', 'formation_mise_a_jour_date')}),
     )
 
+class UserFormationAdminForm(forms.ModelForm):
+    STATE_CHOICES = (
+        ('approved', 'Approved'),
+        ('pending', 'Pending'),
+        ('rejected', 'Rejected'),
+    )
+    state_formation = forms.ChoiceField(choices=STATE_CHOICES, widget=forms.Select)
+
+    class Meta:
+        model = UserFormation
+        fields = '__all__'
+
 class UserFormationAdmin(admin.ModelAdmin):
+    form = UserFormationAdminForm
     list_display = ('user', 'formation', 'date_inscription', 'state_formation', 'get_valide_date')
     list_filter = ('state_formation', 'date_inscription')
     search_fields = ('user__user_username', 'formation__formation_titre')
@@ -185,6 +203,15 @@ class UserFormationAdmin(admin.ModelAdmin):
         (None, {'fields': ('user', 'formation', 'state_formation')}),
         ('Audit Info', {'fields': ('date_inscription', 'valide_par', 'valide_date')}),
     )
+
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        if db_field.name == 'state_formation':
+            kwargs['choices'] = (
+                ('approved', 'Approved'),
+                ('pending', 'Pending'),
+                ('rejected', 'Rejected'),
+            )
+        return super().formfield_for_choice_field(db_field, request, **kwargs)
 
     def validate_formations(self, request, queryset):
         updated = queryset.filter(state_formation='pending').update(
@@ -299,8 +326,6 @@ class PendingUserFormationsAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return request.user.is_superuser
-
-
 
 # Register models
 admin.site.register(User, UserAdmin)
