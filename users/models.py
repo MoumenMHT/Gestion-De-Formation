@@ -138,6 +138,21 @@ class Formation(models.Model):
     formation_programme = models.TextField(blank=True, null=True)
     formation_cible = models.TextField(blank=True, null=True)
     formation_objectif = models.TextField(blank=True, null=True)
+    formation_category = models.CharField(max_length=50, choices=[
+        ('geophysique', 'Géophysique'),
+        ('forage_petrole', 'Forage Pétrolier'),
+        ('production_des_hydrocarbures', 'Production des Hydrocarbures'),
+        ('transport_des_hydrocarbures', 'Transport des Hydrocarbures'),
+        ('exploitation_des_hydrocarbures', 'Exploitation des Hydrocarbures'),
+        ('genie_du_gaz', 'Génie du Gaz'),
+        ('raffinage', 'Raffinage'),
+        ('chimie_et_analyse_des_hydrocarbures', 'Chimie et Analyse des Hydrocarbures'),
+        ('instrumentation_petroliere', 'Instrumentation Pétrolière'),
+        ('maintenance_industrielle', 'Maintenance Industrielle'),
+        ('securite_industrielle_et_environnement', 'Sécurité Industrielle et Environnement'),
+        ('economie_petroliere', 'Économie Pétrolière'),
+        ('energies_nouvelles_et_renouvelables', 'Énergies Nouvelles et Renouvelables'),
+    ])
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='formations', null=True)
     structure = models.ForeignKey(Structure, on_delete=models.CASCADE, related_name='formations')
 

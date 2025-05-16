@@ -1,3 +1,6 @@
+
+
+
 from django.contrib import admin
 from django.urls import path, reverse
 from django.utils.html import format_html
@@ -183,15 +186,15 @@ class DepartmentAdmin(admin.ModelAdmin):
         return request.user.is_superuser and request.user.user_role != 'DRH'
 
 class FormationAdmin(admin.ModelAdmin):
-    list_display = ('formation_titre', 'formation_ref', 'formation_niveau', 'formation_cout', 'formation_pays', 'structure')
-    list_filter = ('formation_niveau', 'formation_pays', 'structure')
+    list_display = ('formation_titre', 'formation_ref', 'formation_niveau', 'formation_cout', 'formation_pays', 'formation_category', 'structure')
+    list_filter = ('formation_niveau', 'formation_pays', 'formation_category', 'structure')
     search_fields = ('formation_titre', 'formation_ref', 'structure__structure_varchar')
     ordering = ('formation_titre',)
     exclude = ('user_id',)
     readonly_fields = ('formation_mise_a_jour_cree', 'formation_mise_a_jour_date')
 
     fieldsets = (
-        (None, {'fields': ('formation_titre', 'formation_ref', 'formation_niveau', 'formation_description', 'formation_cout', 'formation_pays', 'formation_duree', 'formation_prerequis', 'formation_programme', 'formation_cible', 'formation_objectif', 'structure')}),
+        (None, {'fields': ('formation_titre', 'formation_ref', 'formation_niveau', 'formation_description', 'formation_cout', 'formation_pays', 'formation_duree', 'formation_prerequis', 'formation_programme', 'formation_cible', 'formation_objectif', 'formation_category', 'structure')}),
         ('Audit Info', {'fields': ('formation_mise_a_jour_cree', 'formation_mise_a_jour_date')}),
     )
 
