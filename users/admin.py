@@ -35,9 +35,7 @@ class UserAdmin(admin.ModelAdmin):
         ('Audit Info', {'fields': ('user_cree_par', 'user_cree_date', 'user_miseajour_par', 'user_miseajour_date')}),
     )
 
-    def has_module_permission(self, request):
-        # Only superusers who are not DRH can access the User section
-        return request.user.is_superuser and request.user.user_role != 'DRH'
+
 
     def validate_users(self, request, queryset):
         updated = queryset.filter(state='pending').update(state='approved', is_active=True)
