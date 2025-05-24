@@ -228,7 +228,7 @@
                             <tr class="bg-gray-50">
                                 <th class="p-3 text-left text-sm font-medium text-blue-600">Formation Title</th>
                                 <th class="p-3 text-left text-sm font-medium text-blue-600 sortable" data-sort="state" data-direction="none">State</th>
-                                <th class="p-3 text-left text-sm font-medium text-blue-600 sortable" data-sort="date" data-direction="none">Date</th>
+                                <th class="p-3 text-left text-sm font-medium text-blue-600 sortable" data-sort="date" data-direction="none">Validation Date</th>
                                 <th class="p-3 text-left text-sm font-medium text-blue-600">Actions</th>
                             </tr>
                         </thead>
@@ -239,7 +239,12 @@
                                     <td class="p-3 text-sm capitalize {% if user_formation.state_formation == 'pending' %}text-yellow-500{% elif user_formation.state_formation == 'approved' %}text-green-500{% else %}text-red-500{% endif %}">
                                         {{ user_formation.state_formation }}
                                     </td>
-                                    <td class="p-3 text-sm">{{ user_formation.valide_date|date:"Y-m-d" }}</td>
+                                    {% if user_formation.valide_date %}
+                                        <td class="p-3 text-sm">{{ user_formation.valide_date|date:"Y-m-d" }}</td>
+                                    {% else %}
+                                        <td class="p-3 text-sm">Not yet confirmed</td>
+                                    {% endif %}
+
                                     <td class="p-3">
                                         <a href="#" class="view-details-btn bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm"
                                            data-formation-id="{{ user_formation.formation.formation_id }}"

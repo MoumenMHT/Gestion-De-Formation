@@ -341,7 +341,7 @@ class PendingUserFormationsAdmin(admin.ModelAdmin):
                 return redirect('admin:users_pendinguserformations_changelist')
             print(f"Refusing formation for user: {user_formation.user.user_username}, formation: {user_formation.formation.formation_titre} (ID: {pk})")
             user_formation.state_formation = 'rejected'
-            user_formation.valide_par = request.user
+            user_formation.valide_par = request.user.user_id
             user_formation.valide_date = timezone.now()
             user_formation.save()
             Notification.objects.create(
