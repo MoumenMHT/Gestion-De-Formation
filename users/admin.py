@@ -181,7 +181,7 @@ class DepartmentAdmin(admin.ModelAdmin):
 
     def has_module_permission(self, request):
         # Only superusers who are not DRH can access the User section
-        return request.user.is_superuser and request.user.user_role != 'DRH'
+        return request.user.is_superuser
 
 class FormationAdmin(admin.ModelAdmin):
     list_display = ('formation_titre', 'formation_ref', 'formation_niveau', 'formation_cout', 'formation_pays', 'formation_category', 'structure')
